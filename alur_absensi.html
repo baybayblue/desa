@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Alur Proses Bisnis SIAPDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Digital Government -->
+    <!-- Application Structure Plan: Aplikasi ini dirancang sebagai visualisasi alur proses interaktif, bukan dashboard data. Strukturnya berpusat pada peran pengguna (Aktor). Pengguna dapat memilih peran (Admin, Pegawai, Kepala Desa) melalui filter di bagian atas. Pilihan ini akan menyorot (highlight) alur kerja yang relevan bagi peran tersebut dalam diagram proses utama, sementara alur lain akan diredupkan. Setiap langkah dalam diagram dapat diklik untuk menampilkan jendela modal dengan deskripsi detail. Struktur ini dipilih karena paling efektif menerjemahkan dokumen proses bisnis menjadi alat eksplorasi yang intuitif, memungkinkan pemahaman mendalam tentang perjalanan setiap pengguna dalam sistem. -->
+    <!-- Visualization & Content Choices: Alur proses bisnis dari dokumen sumber divisualisasikan menggunakan elemen HTML dan Tailwind CSS untuk membentuk diagram alur yang interaktif. Tujuannya adalah untuk mengorganisir dan menjelaskan proses. Interaksi utama adalah filtering berdasarkan peran dan klik untuk detail. Metode ini dipilih karena memberikan kontrol penuh atas tampilan dan interaktivitas tanpa memerlukan library eksternal seperti MermaidJS, serta memungkinkan penyorotan dinamis yang tidak mungkin dilakukan dengan diagram statis. Semua deskripsi teks diambil langsung dari dokumen sumber dan ditampilkan dalam modal untuk menjaga diagram tetap bersih. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .flow-card {
+            transition: all 0.3s ease-in-out;
+            border: 1px solid #e2e8f0;
+        }
+        .flow-card.active {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6; /* blue-500 */
+        }
+        .flow-card.inactive, .flow-connector.inactive {
+            opacity: 0.3;
+            filter: grayscale(80%);
+        }
+        .flow-connector {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #modal-content {
+            transition: all 0.3s ease-in-out;
+        }
+        .actor-btn.selected {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div id="app" class="container mx-auto px-4 py-8 md:py-12">
+
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Alur Proses Bisnis SIAPDes</h1>
+            <p class="mt-2 text-lg text-slate-600 max-w-3xl mx-auto">Sebuah visualisasi interaktif untuk memahami alur kerja Sistem Informasi Absensi Pegawai Desa. Pilih peran di bawah untuk melihat alur kerja spesifik atau klik setiap kartu untuk detail.</p>
+        </header>
+
+        <nav class="flex justify-center items-center gap-2 md:gap-4 mb-12 flex-wrap">
+            <button data-actor="all" class="actor-btn selected font-medium py-2 px-4 rounded-full transition-all duration-300 bg-white shadow-sm border border-slate-200 hover:bg-slate-100">Semua Aktor</button>
+            <button data-actor="pegawai" class="actor-btn font-medium py-2 px-4 rounded-full transition-all duration-300 bg-white shadow-sm border border-slate-200 hover:bg-slate-100">👤 Pegawai Desa</button>
+            <button data-actor="admin" class="actor-btn font-medium py-2 px-4 rounded-full transition-all duration-300 bg-white shadow-sm border border-slate-200 hover:bg-slate-100">🛠️ Admin</button>
+            <button data-actor="kades" class="actor-btn font-medium py-2 px-4 rounded-full transition-all duration-300 bg-white shadow-sm border border-slate-200 hover:bg-slate-100">👑 Kepala Desa</button>
+        </nav>
+
+        <main class="space-y-8">
+            <!-- Tahap 1: Persiapan Sistem -->
+            <section class="flow-stage" data-stage="1">
+                <h2 class="text-xl font-bold text-center mb-2 text-blue-700">Tahap 1: Persiapan Sistem</h2>
+                <p class="text-center text-slate-500 mb-6">Dilakukan oleh Admin sebelum sistem digunakan secara penuh.</p>
+                <div class="flex flex-col items-center">
+                    <div id="A1" data-actors="admin" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
+                        <span class="font-semibold">A1: Admin Login ke Dashboard</span>
+                    </div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin"></div>
+                    <div id="A2" data-actors="admin" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center">
+                        <span class="font-semibold">A2: Kelola Data</span>
+                    </div>
+                    <div class="flow-connector h-8 w-px bg-slate-400 relative" data-actors="admin">
+                        <div class="absolute left-full top-1/2 ml-4 flex flex-col gap-4">
+                           <div class="flow-connector absolute top-1/2 -left-4 h-px w-4 bg-slate-400" data-actors="admin"></div>
+                           <div class="flow-connector absolute top-1/2 -left-4 h-px w-4 bg-slate-400 -translate-y-12" data-actors="admin"></div>
+                        </div>
+                    </div>
+                    <div class="w-full flex justify-center gap-8 items-start">
+                         <div class="flex flex-col items-center">
+                            <div id="A3" data-actors="admin" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-64 text-center">
+                                <span class="font-semibold">A3: Input/Update Data Pegawai</span>
+                            </div>
+                             <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin"></div>
+                             <div id="A5" data-actors="admin" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-64 text-center">
+                                <span class="font-semibold">A5: Sistem Generate Akun & QR Code</span>
+                            </div>
+                        </div>
+                        <div id="A4" data-actors="admin" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-64 text-center">
+                            <span class="font-semibold">A4: Atur Lokasi, Jam Kerja & Radius</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="flex justify-center">
+                <div class="flow-connector h-12 w-px bg-slate-400 border-dashed" data-actors="all"></div>
+            </div>
+
+            <!-- Tahap 2: Absensi Harian -->
+            <section class="flow-stage" data-stage="2">
+                <h2 class="text-xl font-bold text-center mb-2 text-green-700">Tahap 2: Absensi Harian</h2>
+                <p class="text-center text-slate-500 mb-6">Proses inti yang dilakukan setiap hari kerja oleh Pegawai.</p>
+                <div class="flex flex-col items-center">
+                    <div id="P1" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">P1: Pegawai Tiba di Kantor</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                    <div id="P2" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">P2: Buka PWA SIAPDes</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                    <div id="P3" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">P3: Pilih Menu Scan Absen</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                    <div id="P4" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">P4: Scan QR Code Dinamis</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                    <div id="S1" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">S1: Sistem Validasi 3 Lapis</span></div>
+                    <div class="w-full max-w-md relative">
+                        <div class="flow-connector h-8 w-px bg-slate-400 absolute left-1/2 -translate-x-1/2" data-actors="pegawai"></div>
+                        <div class="flow-connector h-px w-1/2 bg-slate-400 absolute top-8 left-0" data-actors="pegawai"></div>
+                        <div class="flow-connector h-px w-1/2 bg-slate-400 absolute top-8 right-0" data-actors="pegawai"></div>
+                        <div class="flow-connector h-8 w-px bg-slate-400 absolute top-8 left-0" data-actors="pegawai"></div>
+                        <div class="flow-connector h-8 w-px bg-slate-400 absolute top-8 right-0" data-actors="pegawai"></div>
+                    </div>
+                    <div class="w-full flex justify-around mt-16 gap-4">
+                        <div class="flex flex-col items-center text-center w-1/2">
+                            <span class="text-green-600 font-semibold mb-2">✔ Sukses</span>
+                            <div id="S2" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-xs"><span class="font-semibold">S2: Data Absensi Tersimpan</span></div>
+                            <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                            <div id="P5" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-xs"><span class="font-semibold">P5: Notifikasi Berhasil</span></div>
+                        </div>
+                        <div class="flex flex-col items-center text-center w-1/2">
+                            <span class="text-red-600 font-semibold mb-2">✖ Gagal</span>
+                            <div id="S3" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-xs"><span class="font-semibold">S3: Notifikasi Error di PWA</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="flex justify-center">
+                <div class="flow-connector h-12 w-px bg-slate-400 border-dashed" data-actors="all"></div>
+            </div>
+
+            <!-- Tahap 3: Pengajuan Izin/Cuti -->
+            <section class="flow-stage" data-stage="3">
+                <h2 class="text-xl font-bold text-center mb-2 text-amber-700">Tahap 3: Pengajuan Izin/Cuti</h2>
+                <p class="text-center text-slate-500 mb-6">Alur untuk pegawai yang mengajukan izin dan persetujuan oleh Kepala Desa.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                    <div class="flex flex-col items-center col-span-1">
+                        <div class="text-center mb-2 font-semibold">Pegawai</div>
+                        <div id="I1" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">I1: Buka Menu Izin</span></div>
+                        <div class="flow-connector h-8 w-px bg-slate-400" data-actors="pegawai"></div>
+                        <div id="I2" data-actors="pegawai" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">I2: Isi Form & Upload Dokumen</span></div>
+                    </div>
+                    <div class="flex flex-col items-center col-span-1">
+                        <div class="text-center mb-2 font-semibold">Sistem</div>
+                        <div class="flow-connector h-16 w-px bg-slate-400 hidden md:block" data-actors="pegawai kades"></div>
+                        <div class="relative w-full h-10">
+                            <div class="flow-connector absolute top-1/2 -translate-y-1/2 left-0 w-1/2 h-px bg-slate-400" data-actors="pegawai"></div>
+                            <div class="flow-connector absolute top-1/2 -translate-y-1/2 right-0 w-1/2 h-px bg-slate-400" data-actors="kades"></div>
+                        </div>
+                        <div id="I3" data-actors="pegawai kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">I3: Kirim Notifikasi</span></div>
+                        <div class="flow-connector h-24 w-px bg-slate-400" data-actors="kades"></div>
+                        <div class="relative w-full h-10">
+                            <div class="flow-connector absolute top-1/2 -translate-y-1/2 left-0 w-1/2 h-px bg-slate-400" data-actors="pegawai"></div>
+                            <div class="flow-connector absolute top-1/2 -translate-y-1/2 right-0 w-1/2 h-px bg-slate-400" data-actors="kades"></div>
+                        </div>
+                        <div id="I4" data-actors="pegawai kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">I4: Kirim Notifikasi Hasil</span></div>
+                    </div>
+                    <div class="flex flex-col items-center col-span-1">
+                        <div class="text-center mb-2 font-semibold">Kepala Desa</div>
+                        <div id="K1" data-actors="kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">K1: Login & Review Pengajuan</span></div>
+                        <div class="flow-connector h-8 w-px bg-slate-400" data-actors="kades"></div>
+                        <div id="K2" data-actors="kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full text-center"><span class="font-semibold">K2: Keputusan (Setuju/Tolak)</span></div>
+                        <div class="w-full relative">
+                            <div class="flow-connector h-8 w-px bg-slate-400 absolute left-1/2 -translate-x-1/2" data-actors="kades"></div>
+                            <div class="flow-connector h-px w-1/2 bg-slate-400 absolute top-8 left-0" data-actors="kades"></div>
+                            <div class="flow-connector h-px w-1/2 bg-slate-400 absolute top-8 right-0" data-actors="kades"></div>
+                            <div class="flow-connector h-8 w-px bg-slate-400 absolute top-8 left-0" data-actors="kades"></div>
+                            <div class="flow-connector h-8 w-px bg-slate-400 absolute top-8 right-0" data-actors="kades"></div>
+                        </div>
+                        <div class="w-full flex justify-around mt-16 gap-4">
+                            <div id="K3" data-actors="kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-1/2 text-center"><span class="font-semibold">K3: Disetujui</span></div>
+                            <div id="K4" data-actors="kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-1/2 text-center"><span class="font-semibold">K4: Ditolak</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="flex justify-center">
+                <div class="flow-connector h-12 w-px bg-slate-400 border-dashed" data-actors="all"></div>
+            </div>
+
+            <!-- Tahap 4: Pelaporan & Monitoring -->
+            <section class="flow-stage" data-stage="4">
+                <h2 class="text-xl font-bold text-center mb-2 text-indigo-700">Tahap 4: Pelaporan & Monitoring</h2>
+                <p class="text-center text-slate-500 mb-6">Admin dan Kepala Desa memantau dan mengunduh laporan kehadiran.</p>
+                <div class="flex flex-col items-center">
+                    <div id="M1" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M1: Admin/Kades Login</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin kades"></div>
+                    <div id="M2" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M2: Lihat Dashboard Real-time</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin kades"></div>
+                    <div id="M3" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M3: Buka Menu Laporan</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin kades"></div>
+                    <div id="M4" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M4: Filter Periode & Pegawai</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin kades"></div>
+                    <div id="M5" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M5: Sistem Generate Laporan</span></div>
+                    <div class="flow-connector h-8 w-px bg-slate-400" data-actors="admin kades"></div>
+                    <div id="M6" data-actors="admin kades" class="flow-card cursor-pointer bg-white p-4 rounded-lg shadow-md w-full max-w-md text-center"><span class="font-semibold">M6: Unduh Laporan PDF/Excel</span></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div id="modal-backdrop" class="absolute inset-0 bg-black opacity-50"></div>
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl w-11/12 max-w-2xl z-10 transform scale-95">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start">
+                    <h3 id="modal-title" class="text-2xl font-bold text-slate-900"></h3>
+                    <button id="modal-close" class="text-slate-500 hover:text-slate-800 transition-colors">&times;</button>
+                </div>
+                <div id="modal-body" class="mt-4 text-slate-600 leading-relaxed"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const stepDetails = {
+                'A1': { title: 'Admin Login ke Dashboard', body: 'Admin mengakses Dashboard Web SIAPDes melalui browser di laptop/PC dan masuk menggunakan email dan password.' },
+                'A2': { title: 'Kelola Data', body: 'Titik pusat bagi Admin untuk mengelola data pegawai dan pengaturan sistem.' },
+                'A3': { title: 'Input/Update Data Pegawai', body: 'Admin masuk ke menu Manajemen Pegawai untuk menambah, mengubah, atau menonaktifkan data pegawai. Saat data baru disimpan, sistem otomatis membuatkan akun login untuk pegawai tersebut.' },
+                'A4': { title: 'Atur Lokasi, Jam Kerja & Radius', body: 'Di menu Pengaturan, Admin menetapkan titik koordinat GPS kantor, radius toleransi absensi (misal: 50 meter), dan jam kerja resmi (masuk, pulang, toleransi keterlambatan).' },
+                'A5': { title: 'Sistem Generate Akun & QR Code', body: 'Setelah data pegawai diinput, sistem secara otomatis membuatkan akun login dan QR Code unik untuk setiap pegawai yang dapat dicetak pada ID Card.' },
+                'P1': { title: 'Pegawai Tiba di Kantor', body: 'Pegawai tiba di lingkungan kantor desa sesuai dengan radius yang telah ditetapkan oleh Admin.' },
+                'P2': { title: 'Buka PWA SIAPDes', body: 'Pegawai membuka Progressive Web App (PWA) SIAPDes di smartphone yang sudah ditambahkan ke layar utama.' },
+                'P3': { title: 'Pilih Menu Scan Absen', body: 'Di halaman utama aplikasi, pegawai menekan tombol besar "SCAN ABSEN" untuk memulai proses absensi.' },
+                'P4': { title: 'Scan QR Code Dinamis', body: 'Aplikasi mengaktifkan kamera. Pegawai mengarahkan kamera ke QR Code dinamis yang ditampilkan pada perangkat (tablet/monitor) di pintu masuk kantor. QR Code ini berubah setiap menit untuk keamanan.' },
+                'S1': { title: 'Sistem Validasi 3 Lapis', body: 'Sistem secara instan melakukan validasi berlapis: 1. Keaslian QR Code, 2. Lokasi (Geofencing) untuk memastikan pegawai berada dalam radius kantor, 3. Waktu absensi untuk menentukan status tepat waktu atau terlambat.' },
+                'S2': { title: 'Data Absensi Tersimpan', body: 'Jika validasi berhasil, data kehadiran (waktu, lokasi) akan disimpan secara aman di database sistem.' },
+                'S3': { title: 'Notifikasi Error di PWA', body: 'Jika validasi gagal, pegawai akan menerima notifikasi error yang jelas, seperti "Anda Berada di Luar Jangkauan Area Kantor" atau "QR Code Tidak Valid".' },
+                'P5': { title: 'Notifikasi Berhasil', body: 'Pegawai menerima notifikasi pop-up "Absensi Berhasil" di aplikasi, memberikan konfirmasi bahwa kehadirannya telah tercatat.' },
+                'I1': { title: 'Buka Menu Izin', body: 'Pegawai membuka menu "Izin/Cuti" di dalam PWA SIAPDes untuk memulai proses pengajuan.' },
+                'I2': { title: 'Isi Form & Upload Dokumen', body: 'Pegawai mengisi formulir digital (jenis izin, tanggal, keterangan) dan mengunggah dokumen pendukung jika diperlukan (misal: foto surat dokter) langsung dari smartphone.' },
+                'I3': { title: 'Kirim Notifikasi', body: 'Setelah pegawai mengirim pengajuan, sistem secara otomatis mengirimkan notifikasi ke dashboard Kepala Desa, memberitahukan adanya pengajuan baru yang perlu ditinjau.' },
+                'K1': { title: 'Login & Review Pengajuan', body: 'Kepala Desa login ke Dashboard Web dan masuk ke menu "Persetujuan Izin" untuk melihat daftar pengajuan yang menunggu.' },
+                'K2': { title: 'Keputusan (Setuju/Tolak)', body: 'Kepala Desa melihat detail pengajuan, termasuk lampiran, lalu memberikan keputusan dengan menekan tombol "Setujui" atau "Tolak".' },
+                'K3': { title: 'Status Diubah Jadi \'Disetujui\'', body: 'Jika disetujui, status pengajuan di database diubah dan catatan kehadiran pegawai pada tanggal tersebut diperbarui secara otomatis.' },
+                'K4': { title: 'Status Diubah Jadi \'Ditolak\'', body: 'Jika ditolak, status pengajuan di database diubah. Kepala Desa dapat menambahkan catatan alasan penolakan.' },
+                'I4': { title: 'Kirim Notifikasi Hasil', body: 'Sistem secara otomatis mengirimkan notifikasi hasil keputusan (disetujui atau ditolak) kepada pegawai yang bersangkutan melalui PWA.' },
+                'M1': { title: 'Admin/Kades Login', body: 'Admin atau Kepala Desa login ke Dashboard Web SIAPDes untuk mengakses fitur monitoring dan pelaporan.' },
+                'M2': { title: 'Lihat Dashboard Real-time', body: 'Halaman utama dashboard menampilkan ringkasan kehadiran hari itu secara langsung: jumlah pegawai hadir, terlambat, dan yang belum absen.' },
+                'M3': { title: 'Buka Menu Laporan', body: 'Pengguna masuk ke menu "Laporan Kehadiran" untuk membuat rekapitulasi data kehadiran.' },
+                'M4': { title: 'Filter Periode & Pegawai', body: 'Pengguna menggunakan filter untuk memilih rentang tanggal laporan (harian, mingguan, bulanan) dan/atau memilih pegawai tertentu untuk laporan yang lebih spesifik.' },
+                'M5': { title: 'Sistem Generate Laporan', body: 'Berdasarkan filter yang dipilih, sistem akan mengolah data dan menghasilkan tabel rekapitulasi kehadiran yang lengkap.' },
+                'M6': { title: 'Unduh Laporan PDF/Excel', body: 'Pengguna dapat mengunduh laporan yang telah digenerate dalam format PDF untuk arsip resmi atau Excel untuk pengolahan data lebih lanjut.' }
+            };
+
+            const actorBtns = document.querySelectorAll('.actor-btn');
+            const flowCards = document.querySelectorAll('.flow-card');
+            const flowConnectors = document.querySelectorAll('.flow-connector');
+            const modal = document.getElementById('modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const modalClose = document.getElementById('modal-close');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalContent = document.getElementById('modal-content');
+
+            function updateFlow(selectedActor) {
+                actorBtns.forEach(btn => {
+                    if (btn.dataset.actor === selectedActor) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                });
+
+                const allElements = [...flowCards, ...flowConnectors];
+
+                allElements.forEach(el => {
+                    const actors = el.dataset.actors.split(' ');
+                    if (selectedActor === 'all' || actors.includes(selectedActor)) {
+                        el.classList.remove('inactive');
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                        el.classList.add('inactive');
+                    }
+                });
+            }
+
+            function showModal(stepId) {
+                const details = stepDetails[stepId];
+                if (details) {
+                    modalTitle.textContent = details.title;
+                    modalBody.textContent = details.body;
+                    modal.classList.remove('hidden');
+                    setTimeout(() => {
+                       modalBackdrop.classList.remove('opacity-0');
+                       modalContent.classList.remove('scale-95');
+                    }, 10);
+                }
+            }
+
+            function hideModal() {
+                modalBackdrop.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+
+            actorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateFlow(btn.dataset.actor);
+                });
+            });
+
+            flowCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    showModal(card.id);
+                });
+            });
+
+            modalClose.addEventListener('click', hideModal);
+            modalBackdrop.addEventListener('click', hideModal);
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && !modal.classList.contains('hidden')) {
+                    hideModal();
+                }
+            });
+
+            updateFlow('all');
+        });
+    </script>
+</body>
+</html>

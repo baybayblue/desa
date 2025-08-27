@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Aplikasi SIKeuDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Green Accent -->
+    <!-- Application Structure Plan: Mengimplementasikan alur proses bisnis langsung ke dalam struktur navigasi aplikasi. Sidebar kini mencerminkan tahapan utama: Dasbor, Perencanaan, Penganggaran, Pelaksanaan, Pelaporan, dan Pengaturan. Ini mengubah aplikasi menjadi alat kerja yang memandu pengguna melalui siklus keuangan desa secara logis. Setiap modul memiliki konten mockup yang relevan dengan tahapannya, seperti tabel RKPDes di Perencanaan atau tabel SPP di Pelaksanaan. -->
+    <!-- Visualization & Content Choices: 
+        - Layout Aplikasi: Report Info -> Kebutuhan aplikasi SIKeuDes. Goal -> Mengorganisir. Viz/Presentation -> Layout Dasbor (Sidebar + Header + Content Area). Interaction -> Navigasi antar modul (tahapan proses) melalui klik sidebar. Justification -> Struktur ini secara inheren mengimplementasikan alur kerja, membuatnya intuitif bagi pengguna. Library/Method -> HTML/Tailwind CSS.
+        - Dasbor Utama: Report Info -> Kebutuhan monitoring. Goal -> Menginformasikan. Viz/Presentation -> Kartu KPI dan bagan serapan anggaran. Interaction -> Tampilan ringkasan. Justification -> Memberikan gambaran umum kondisi keuangan desa secara cepat saat login. Library/Method -> Chart.js.
+        - Modul Perencanaan/Penganggaran/Pelaksanaan: Report Info -> Proses di setiap tahap. Goal -> Mengorganisir & Input data. Viz/Presentation -> Tabel data (RKPDes, APBDes, SPP) dengan tombol aksi. Justification -> Format standar dan efektif untuk manajemen data di setiap tahapan. Library/Method -> HTML/Tailwind CSS.
+        - Form Modal SPP: (Dipertahankan) Sebagai contoh implementasi input data yang kompleks.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #3f3c3a;
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #ECFDF5;
+            color: #065F46;
+            border-right: 3px solid #10B981;
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .chart-container-large {
+            position: relative;
+            height: 40vh;
+            width: 100%;
+        }
+        .login-bg {
+             background-color: #f0fdf4;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden md:grid md:grid-cols-2">
+            <div class="p-8 md:p-12 order-2 md:order-1">
+                <div class="text-left mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Masuk ke Akun Anda</h1>
+                    <p class="text-gray-500 mt-2">Selamat datang kembali! Silakan pilih peran Anda.</p>
+                </div>
+                <form id="loginForm">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="userRole" class="text-sm font-medium text-gray-700">Masuk sebagai</label>
+                            <select id="userRole" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                <option value="operator">Operator Desa</option>
+                                <option value="kades">Kepala Desa</option>
+                                <option value="bendahara">Bendahara Desa</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="username" class="text-sm font-medium text-gray-700">Nama Pengguna</label>
+                            <input type="text" id="username" name="username" class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" required>
+                        </div>
+                        <div>
+                            <label for="password" class="text-sm font-medium text-gray-700">Kata Sandi</label>
+                            <input type="password" id="password" name="password" class="mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" value="password" required>
+                            <p class="text-xs text-gray-400 mt-2">Untuk presentasi, gunakan kata sandi: **password**</p>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                                Masuk
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="hidden md:flex items-center justify-center p-8 login-bg order-1 md:order-2">
+                 <div class="text-center text-emerald-900">
+                    <div class="text-6xl mb-4">🌿</div>
+                    <h2 class="text-2xl font-bold">SIKeuDes</h2>
+                    <p class="mt-2 max-w-sm mx-auto">Mewujudkan Tata Kelola Keuangan Desa yang Transparan, Akuntabel, dan Efisien untuk Kemajuan Bersama.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APLIKASI UNTUK OPERATOR ===== -->
+    <div id="mainAppOperator" class="main-app hidden">
+        <div class="flex h-screen bg-gray-100">
+            <aside class="w-64 bg-white shadow-md hidden md:block">
+                <div class="p-4 border-b">
+                    <h2 class="text-xl font-bold text-emerald-600">SIKeuDes</h2>
+                    <p class="text-xs text-gray-500">Desa Makmur Jaya (Operator)</p>
+                </div>
+                <nav class="py-4 sidebar-nav">
+                    <a href="#dashboard" data-target="dashboardContentOperator" class="sidebar-link flex items-center px-4 py-3 text-gray-700 active">
+                        <span class="mr-3">🏠</span> Dasbor
+                    </a>
+                    <a href="#perencanaan" data-target="perencanaanContent" class="sidebar-link flex items-center px-4 py-3 text-gray-700">
+                        <span class="mr-3">🗺️</span> Perencanaan
+                    </a>
+                    <a href="#penganggaran" data-target="penganggaranContent" class="sidebar-link flex items-center px-4 py-3 text-gray-700">
+                        <span class="mr-3">💰</span> Penganggaran
+                    </a>
+                    <a href="#pelaksanaan" data-target="pelaksanaanContent" class="sidebar-link flex items-center px-4 py-3 text-gray-700">
+                        <span class="mr-3">📝</span> Pelaksanaan
+                    </a>
+                    <a href="#pelaporan" data-target="pelaporanContent" class="sidebar-link flex items-center px-4 py-3 text-gray-700">
+                        <span class="mr-3">📊</span> Pelaporan
+                    </a>
+                </nav>
+            </aside>
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex justify-between items-center p-4 bg-white border-b">
+                    <h1 class="page-title text-2xl font-semibold text-gray-800">Dasbor</h1>
+                    <div class="flex items-center">
+                        <span class="mr-4">Selamat datang, Operator!</span>
+                        <button class="logoutButton px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Keluar</button>
+                    </div>
+                </header>
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                    <div id="dashboardContentOperator" class="app-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                            <div class="bg-white p-4 rounded-lg shadow"><h4 class="text-sm font-medium text-gray-500">Total Anggaran 2025</h4><p class="text-2xl font-bold text-gray-800">Rp 1.25 M</p></div>
+                            <div class="bg-white p-4 rounded-lg shadow"><h4 class="text-sm font-medium text-gray-500">Realisasi</h4><p class="text-2xl font-bold text-emerald-600">Rp 450 Jt</p></div>
+                            <div class="bg-white p-4 rounded-lg shadow"><h4 class="text-sm font-medium text-gray-500">Sisa Anggaran</h4><p class="text-2xl font-bold text-orange-500">Rp 800 Jt</p></div>
+                            <div class="bg-white p-4 rounded-lg shadow"><h4 class="text-sm font-medium text-gray-500">SPP Diproses</h4><p class="text-2xl font-bold text-blue-500">12</p></div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow"><h3 class="text-xl font-semibold mb-4">Grafik Serapan Anggaran per Bulan</h3><div class="chart-container-large"><canvas class="serapanChart"></canvas></div></div>
+                    </div>
+                    <div id="perencanaanContent" class="app-content hidden">
+                        <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-semibold">Rencana Kerja Pemerintah Desa (RKPDes) 2025</h3><button class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">+ Tambah Usulan</button></div>
+                        <div class="bg-white rounded-lg shadow overflow-x-auto"><table class="w-full whitespace-nowrap"><thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"><th class="p-3">Prioritas</th><th class="p-3">Nama Kegiatan</th><th class="p-3">Lokasi</th><th class="p-3">Pagu Indikatif</th><th class="p-3">Status</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr><td class="p-3">1</td><td class="p-3">Pembangunan Jalan Desa RT 01</td><td class="p-3">Dusun Melati</td><td class="p-3">Rp 150.000.000</td><td class="p-3"><span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Ditetapkan</span></td></tr><tr><td class="p-3">2</td><td class="p-3">Pelatihan PKK</td><td class="p-3">Balai Desa</td><td class="p-3">Rp 15.000.000</td><td class="p-3"><span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Ditetapkan</span></td></tr></tbody></table></div>
+                    </div>
+                    <div id="penganggaranContent" class="app-content hidden">
+                         <div class="bg-white p-6 rounded-lg shadow"><h3 class="text-xl font-semibold mb-4">Anggaran Pendapatan dan Belanja Desa (APBDes) 2025</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div><h4 class="font-semibold text-lg mb-2">Sumber Pendapatan</h4><ul class="space-y-2 text-sm"><li class="flex justify-between"><span>Dana Desa (DD)</span> <strong>Rp 800.000.000</strong></li><li class="flex justify-between"><span>Alokasi Dana Desa (ADD)</span> <strong>Rp 400.000.000</strong></li><li class="flex justify-between"><span>Pendapatan Asli Desa (PAD)</span> <strong>Rp 50.000.000</strong></li><li class="flex justify-between border-t pt-2 mt-2"><strong>Total Pendapatan</strong> <strong class="text-emerald-600">Rp 1.250.000.000</strong></li></ul></div><div><h4 class="font-semibold text-lg mb-2">Alokasi Belanja</h4><ul class="space-y-2 text-sm"><li class="flex justify-between"><span>Bidang Pemerintahan</span> <strong>Rp 300.000.000</strong></li><li class="flex justify-between"><span>Bidang Pembangunan</span> <strong>Rp 750.000.000</strong></li><li class="flex justify-between"><span>Bidang Pemberdayaan</span> <strong>Rp 200.000.000</strong></li><li class="flex justify-between border-t pt-2 mt-2"><strong>Total Belanja</strong> <strong class="text-emerald-600">Rp 1.250.000.000</strong></li></ul></div></div></div>
+                    </div>
+                    <div id="pelaksanaanContent" class="app-content hidden">
+                        <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-semibold">Daftar Surat Permintaan Pembayaran (SPP)</h3><button class="openSppModal px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">+ Buat SPP Baru</button></div>
+                        <div class="bg-white rounded-lg shadow overflow-x-auto"><table class="w-full whitespace-nowrap"><thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"><th class="p-3">No. SPP</th><th class="p-3">Tanggal</th><th class="p-3">Kegiatan</th><th class="p-3">Jumlah</th><th class="p-3">Status</th><th class="p-3">Aksi</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr><td class="p-3">SPP/001/V/2025</td><td class="p-3">24-08-2025</td><td class="p-3">Pembangunan Jalan Desa RT 01</td><td class="p-3">Rp 15.000.000</td><td class="p-3"><span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Disetujui</span></td><td class="p-3"><a href="#" class="text-emerald-600 hover:underline">Detail</a></td></tr><tr><td class="p-3">SPP/002/V/2025</td><td class="p-3">25-08-2025</td><td class="p-3">Pelatihan PKK</td><td class="p-3">Rp 2.500.000</td><td class="p-3"><span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Verifikasi</span></td><td class="p-3"><a href="#" class="text-emerald-600 hover:underline">Detail</a></td></tr></tbody></table></div>
+                    </div>
+                    <div id="pelaporanContent" class="app-content hidden">
+                        <div class="bg-white p-6 rounded-lg shadow"><h3 class="text-xl font-semibold mb-4">Pusat Laporan</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="border p-4 rounded-lg"><h4 class="font-semibold text-lg">Laporan Realisasi Anggaran</h4><p class="text-sm text-gray-600 mb-4">Menampilkan perbandingan antara anggaran dan realisasi belanja.</p><div class="flex items-center space-x-2"><input type="date" class="p-2 border rounded-md w-full"><span class="text-gray-500">s/d</span><input type="date" class="p-2 border rounded-md w-full"></div><button class="mt-4 w-full px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">Generate Laporan</button></div><div class="border p-4 rounded-lg"><h4 class="font-semibold text-lg">Buku Kas Umum (BKU)</h4><p class="text-sm text-gray-600 mb-4">Menampilkan seluruh transaksi kas secara kronologis.</p><div class="flex items-center space-x-2"><input type="date" class="p-2 border rounded-md w-full"><span class="text-gray-500">s/d</span><input type="date" class="p-2 border rounded-md w-full"></div><button class="mt-4 w-full px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">Tampilkan BKU</button></div></div></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APLIKASI UNTUK KEPALA DESA ===== -->
+    <div id="mainAppKades" class="main-app hidden">
+        <div class="flex h-screen bg-gray-100">
+            <aside class="w-64 bg-white shadow-md hidden md:block">
+                <div class="p-4 border-b"><h2 class="text-xl font-bold text-emerald-600">SIKeuDes</h2><p class="text-xs text-gray-500">Desa Makmur Jaya (Kades)</p></div>
+                <nav class="py-4 sidebar-nav">
+                    <a href="#dashboard" data-target="dashboardContentKades" class="sidebar-link flex items-center px-4 py-3 text-gray-700 active"><span class="mr-3">🏠</span> Dasbor Persetujuan</a>
+                    <a href="#monitoring" data-target="monitoringContentKades" class="sidebar-link flex items-center px-4 py-3 text-gray-700"><span class="mr-3">📈</span> Monitoring Realisasi</a>
+                </nav>
+            </aside>
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex justify-between items-center p-4 bg-white border-b"><h1 class="page-title text-2xl font-semibold text-gray-800">Dasbor Persetujuan</h1><div class="flex items-center"><span class="mr-4">Selamat datang, Kepala Desa!</span><button class="logoutButton px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Keluar</button></div></header>
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                    <div id="dashboardContentKades" class="app-content">
+                        <h3 class="text-xl font-semibold mb-4">Dokumen Memerlukan Persetujuan Anda</h3>
+                        <div class="bg-white rounded-lg shadow overflow-x-auto">
+                            <table class="w-full whitespace-nowrap"><thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"><th class="p-3">Dokumen</th><th class="p-3">Tanggal</th><th class="p-3">Keterangan</th><th class="p-3">Jumlah</th><th class="p-3">Aksi</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr><td class="p-3">SPP/002/V/2025</td><td class="p-3">25-08-2025</td><td class="p-3">Pelatihan PKK</td><td class="p-3">Rp 2.500.000</td><td class="p-3 space-x-2"><button class="px-2 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600">Setujui</button><button class="px-2 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600">Tolak</button></td></tr><tr><td class="p-3">RKPDes 2026</td><td class="p-3">20-08-2025</td><td class="p-3">Rancangan RKPDes Tahun 2026</td><td class="p-3">-</td><td class="p-3 space-x-2"><button class="px-2 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600">Setujui</button><button class="px-2 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600">Tolak</button></td></tr></tbody></table>
+                        </div>
+                    </div>
+                    <div id="monitoringContentKades" class="app-content hidden">
+                        <div class="bg-white p-6 rounded-lg shadow"><h3 class="text-xl font-semibold mb-4">Grafik Serapan Anggaran per Bulan</h3><div class="chart-container-large"><canvas class="serapanChart"></canvas></div></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APLIKASI UNTUK BENDAHARA ===== -->
+    <div id="mainAppBendahara" class="main-app hidden">
+        <div class="flex h-screen bg-gray-100">
+            <aside class="w-64 bg-white shadow-md hidden md:block">
+                <div class="p-4 border-b"><h2 class="text-xl font-bold text-emerald-600">SIKeuDes</h2><p class="text-xs text-gray-500">Desa Makmur Jaya (Bendahara)</p></div>
+                <nav class="py-4 sidebar-nav">
+                    <a href="#pencatatan" data-target="pencatatanContentBendahara" class="sidebar-link flex items-center px-4 py-3 text-gray-700 active"><span class="mr-3">✍️</span> Pencatatan Transaksi</a>
+                    <a href="#bku" data-target="bkuContentBendahara" class="sidebar-link flex items-center px-4 py-3 text-gray-700"><span class="mr-3">📖</span> Buku Kas Umum</a>
+                </nav>
+            </aside>
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="flex justify-between items-center p-4 bg-white border-b"><h1 class="page-title text-2xl font-semibold text-gray-800">Pencatatan Transaksi</h1><div class="flex items-center"><span class="mr-4">Selamat datang, Bendahara!</span><button class="logoutButton px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700">Keluar</button></div></header>
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                    <div id="pencatatanContentBendahara" class="app-content">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-semibold mb-4">Catat Transaksi Baru</h3>
+                            <form class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium">Jenis Transaksi</label><select class="mt-1 block w-full p-2 border rounded-md"><option>Pengeluaran (Belanja)</option><option>Penerimaan (Pendapatan)</option></select></div>
+                                    <div><label class="block text-sm font-medium">Tanggal</label><input type="date" class="mt-1 block w-full p-2 border rounded-md"></div>
+                                </div>
+                                <div><label class="block text-sm font-medium">Uraian</label><input type="text" placeholder="cth: Pembelian ATK Pelatihan PKK" class="mt-1 block w-full p-2 border rounded-md"></div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-sm font-medium">No. Bukti</label><input type="text" placeholder="cth: KWT/005" class="mt-1 block w-full p-2 border rounded-md"></div>
+                                    <div><label class="block text-sm font-medium">Jumlah (Rp)</label><input type="number" placeholder="2500000" class="mt-1 block w-full p-2 border rounded-md"></div>
+                                </div>
+                                <div class="flex justify-end"><button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">Simpan Transaksi</button></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="bkuContentBendahara" class="app-content hidden">
+                        <h3 class="text-xl font-semibold mb-4">Buku Kas Umum - Agustus 2025</h3>
+                        <div class="bg-white rounded-lg shadow overflow-x-auto"><table class="w-full whitespace-nowrap"><thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"><th class="p-3">Tanggal</th><th class="p-3">No. Bukti</th><th class="p-3">Uraian</th><th class="p-3">Penerimaan (Rp)</th><th class="p-3">Pengeluaran (Rp)</th><th class="p-3">Saldo (Rp)</th></tr></thead><tbody class="bg-white divide-y divide-gray-200"><tr><td class="p-3">01-08-2025</td><td class="p-3">-</td><td class="p-3">Saldo Awal</td><td class="p-3"></td><td class="p-3"></td><td class="p-3">250.000.000</td></tr><tr><td class="p-3">15-08-2025</td><td class="p-3">TRF/01</td><td class="p-3">Penerimaan Dana Desa Tahap II</td><td class="p-3">400.000.000</td><td class="p-3"></td><td class="p-3">650.000.000</td></tr><tr><td class="p-3">24-08-2025</td><td class="p-3">KWT/004</td><td class="p-3">Pembayaran Termin 1 Jalan Desa</td><td class="p-3"></td><td class="p-3">15.000.000</td><td class="p-3">635.000.000</td></tr></tbody></table></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    
+    <div id="sppModal" class="fixed inset-0 z-50 items-center justify-center hidden">
+        <div id="sppModalBackdrop" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop"></div>
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl m-4 relative modal-content transform scale-95">
+            <div class="p-6 border-b"><h3 class="text-xl font-semibold">Buat Surat Permintaan Pembayaran (SPP) Baru</h3></div>
+            <form id="sppForm" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div><label for="kegiatan" class="block text-sm font-medium text-gray-700">Pilih Kegiatan</label><select id="kegiatan" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option>Pembangunan Jalan Desa RT 01</option><option>Pelatihan PKK</option><option>Pemberian Makanan Tambahan (PMT) Balita</option></select></div>
+                <div><label for="uraian" class="block text-sm font-medium text-gray-700">Uraian Kebutuhan</label><textarea id="uraian" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500" placeholder="Jelaskan kebutuhan untuk kegiatan ini..."></textarea></div>
+                <div><h4 class="text-md font-semibold mb-2">Rincian Anggaran</h4><div id="rincianContainer" class="space-y-2"><div class="flex items-center space-x-2"><input type="text" placeholder="Item" class="w-1/2 p-2 border rounded-md"><input type="number" placeholder="Jumlah" class="w-1/4 p-2 border rounded-md"><input type="number" placeholder="Harga Satuan" class="w-1/4 p-2 border rounded-md"><button type="button" class="text-red-500 p-2 remove-rincian">&times;</button></div></div><button type="button" id="addRincian" class="mt-2 text-sm text-emerald-600 hover:underline">+ Tambah Rincian</button></div>
+                <div><label for="lampiran" class="block text-sm font-medium text-gray-700">Lampiran (Proposal, Kuitansi, dll)</label><input type="file" id="lampiran" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"/></div>
+            </form>
+            <div class="p-6 border-t bg-gray-50 flex justify-end space-x-3"><button type="button" id="closeSppModal" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Batal</button><button type="submit" form="sppForm" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700">Simpan SPP</button></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginScreen = document.getElementById('loginScreen');
+            const mainApps = document.querySelectorAll('.main-app');
+            const loginForm = document.getElementById('loginForm');
+            const userRoleSelect = document.getElementById('userRole');
+            const usernameInput = document.getElementById('username');
+            
+            let serapanCharts = [];
+
+            function updateUsernamePlaceholder() {
+                const role = userRoleSelect.value;
+                let placeholderText = '';
+                if (role === 'operator') {
+                    placeholderText = 'Gunakan: operator';
+                } else if (role === 'kades') {
+                    placeholderText = 'Gunakan: kades';
+                } else if (role === 'bendahara') {
+                    placeholderText = 'Gunakan: bendahara';
+                }
+                usernameInput.placeholder = placeholderText;
+                usernameInput.value = role; // Auto-fill for presentation
+            }
+
+            userRoleSelect.addEventListener('change', updateUsernamePlaceholder);
+            updateUsernamePlaceholder(); // Initial call
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const role = userRoleSelect.value;
+                loginScreen.classList.add('hidden');
+                
+                let targetApp;
+                if (role === 'operator') {
+                    targetApp = document.getElementById('mainAppOperator');
+                } else if (role === 'kades') {
+                    targetApp = document.getElementById('mainAppKades');
+                } else if (role === 'bendahara') {
+                    targetApp = document.getElementById('mainAppBendahara');
+                }
+
+                if (targetApp) {
+                    targetApp.classList.remove('hidden');
+                    renderSerapanCharts(targetApp);
+                }
+            });
+            
+            document.querySelectorAll('.logoutButton').forEach(button => {
+                button.addEventListener('click', function() {
+                    mainApps.forEach(app => app.classList.add('hidden'));
+                    loginScreen.classList.remove('hidden');
+                });
+            });
+
+            document.querySelectorAll('.sidebar-nav').forEach(nav => {
+                nav.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const link = e.target.closest('.sidebar-link');
+                    if (!link) return;
+
+                    const parentApp = nav.closest('.main-app');
+                    parentApp.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    const targetId = link.dataset.target;
+                    parentApp.querySelector('.page-title').textContent = link.textContent.trim();
+
+                    parentApp.querySelectorAll('.app-content').forEach(div => {
+                        if (div.id === targetId) {
+                            div.classList.remove('hidden');
+                        } else {
+                            div.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            function toggleModal(show) {
+                const sppModal = document.getElementById('sppModal');
+                const sppModalBackdrop = document.getElementById('sppModalBackdrop');
+                if (show) {
+                    sppModal.classList.remove('hidden');
+                    sppModal.classList.add('flex');
+                    setTimeout(() => {
+                        sppModalBackdrop.classList.remove('opacity-0');
+                        sppModal.querySelector('.modal-content').classList.remove('scale-95');
+                        sppModal.querySelector('.modal-content').classList.add('scale-100');
+                    }, 10);
+                } else {
+                    sppModalBackdrop.classList.add('opacity-0');
+                    sppModal.querySelector('.modal-content').classList.add('scale-95');
+                    sppModal.querySelector('.modal-content').classList.remove('scale-100');
+                    setTimeout(() => {
+                        sppModal.classList.add('hidden');
+                        sppModal.classList.remove('flex');
+                    }, 300);
+                }
+            }
+
+            document.querySelectorAll('.openSppModal').forEach(btn => {
+                btn.addEventListener('click', () => toggleModal(true));
+            });
+            document.getElementById('closeSppModal').addEventListener('click', () => toggleModal(false));
+            document.getElementById('sppModalBackdrop').addEventListener('click', () => toggleModal(false));
+
+            document.getElementById('addRincian').addEventListener('click', function() {
+                const rincianContainer = document.getElementById('rincianContainer');
+                const newRincian = document.createElement('div');
+                newRincian.className = 'flex items-center space-x-2';
+                newRincian.innerHTML = `<input type="text" placeholder="Item" class="w-1/2 p-2 border rounded-md"><input type="number" placeholder="Jumlah" class="w-1/4 p-2 border rounded-md"><input type="number" placeholder="Harga Satuan" class="w-1/4 p-2 border rounded-md"><button type="button" class="text-red-500 p-2 remove-rincian">&times;</button>`;
+                rincianContainer.appendChild(newRincian);
+            });
+
+            document.getElementById('rincianContainer').addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-rincian')) {
+                    e.target.parentElement.remove();
+                }
+            });
+
+            function renderSerapanCharts(container) {
+                const chartCanvases = container.querySelectorAll('.serapanChart');
+                chartCanvases.forEach((canvas, index) => {
+                    const ctx = canvas.getContext('2d');
+                    if (serapanCharts[index]) {
+                        serapanCharts[index].destroy();
+                    }
+                    serapanCharts[index] = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu'],
+                            datasets: [{
+                                label: 'Realisasi Anggaran (Juta Rp)',
+                                data: [20, 45, 80, 120, 180, 250, 350, 450],
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

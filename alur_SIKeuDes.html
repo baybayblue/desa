@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Alur Proses Bisnis SIKeuDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Green Accent -->
+    <!-- Application Structure Plan: Aplikasi ini menggunakan struktur visual berbasis alur proses (flowchart) horizontal yang interaktif, bukan meniru struktur linear laporan. Pengguna dapat melihat keseluruhan proses dalam satu layar (desktop) atau menggulir (mobile). Struktur ini dipilih karena secara intuitif memetakan alur kerja yang berurutan. Interaksi utama adalah mengklik setiap langkah untuk melihat detail di panel terpusat dan memfilter seluruh alur berdasarkan peran (Aktor). Pendekatan ini mengubah dokumen statis menjadi alat eksplorasi dinamis, yang lebih efektif untuk memahami hubungan antar tugas dan peran. Sebuah dasbor ringkas dengan bagan donat ditambahkan untuk memberikan ringkasan kuantitatif tentang distribusi tugas. -->
+    <!-- Visualization & Content Choices: 
+        - Alur Proses (5 Tahap): Report Info -> Alur kerja SIKeuDes. Goal -> Mengorganisir. Viz/Presentation -> Diagram alur horizontal yang dibuat dengan HTML/CSS (Flexbox & pseudo-elements untuk panah). Interaction -> Klik pada setiap langkah untuk menampilkan detail. Justification -> Visualisasi alur adalah cara paling efektif untuk merepresentasikan proses yang berurutan. Library/Method -> HTML/Tailwind CSS.
+        - Detail Langkah: Report Info -> Aktor, Proses, Output untuk setiap langkah. Goal -> Menginformasikan. Viz/Presentation -> Panel konten dinamis. Interaction -> Konten diperbarui saat langkah diklik. Justification -> Menjaga tampilan utama tetap bersih dengan menampilkan detail hanya saat dibutuhkan. Library/Method -> Vanilla JS (innerHTML update).
+        - Filter Peran (Aktor): Report Info -> Daftar Aktor. Goal -> Membandingkan & Mengorganisir. Viz/Presentation -> Dropdown filter. Interaction -> Memilih aktor akan menyorot semua langkah terkait di alur proses dan memperbarui bagan. Justification -> Memberikan perspektif baru dan memungkinkan pengguna untuk menganalisis beban kerja atau keterlibatan setiap peran. Library/Method -> Vanilla JS.
+        - Distribusi Tugas: Report Info -> Keterlibatan aktor di setiap langkah (dihitung dari laporan). Goal -> Membandingkan. Viz/Presentation -> Bagan Donat. Interaction -> Bagan diperbarui sesuai dengan filter aktor. Justification -> Memberikan ringkasan visual dan kuantitatif dari data proses yang kualitatif. Library/Method -> Chart.js (Canvas).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfbf8;
+            color: #3f3c3a;
+        }
+        .stage-container {
+            flex: 1;
+            min-width: 300px;
+        }
+        .step-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .step-card.active {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #10B981;
+        }
+        .step-card.highlight {
+            background-color: #ECFDF5;
+            border-color: #10B981;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #d1d5db;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Visualisasi Interaktif Alur Proses Bisnis SIKeuDes</h1>
+            <p class="mt-2 text-lg text-gray-600">Jelajahi setiap tahapan pengelolaan keuangan desa secara efisien, transparan, dan akuntabel.</p>
+        </header>
+
+        <main>
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-semibold text-gray-700">Pilih Perspektif</h2>
+                        <p class="text-gray-500">Filter alur proses berdasarkan peran (Aktor) untuk melihat tugas dan tanggung jawab mereka.</p>
+                    </div>
+                    <select id="actorFilter" class="w-full md:w-auto bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2.5">
+                        <option value="Semua">Tampilkan Semua Aktor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="processFlow" class="flex overflow-x-auto space-x-4 pb-4 -mx-4 px-4">
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+                <div id="detailPanel" class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 min-h-[300px] flex flex-col justify-center">
+                    <div id="detailContent" class="text-center">
+                        <div class="text-6xl mb-4">👆</div>
+                        <h3 class="text-xl font-bold text-gray-800">Panel Detail Interaktif</h3>
+                        <p class="text-gray-600 mt-2">Klik pada salah satu langkah di alur proses di atas untuk melihat detail lengkapnya di sini, termasuk Aktor yang terlibat, Proses yang dilakukan, dan Output yang dihasilkan.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 text-center mb-4">Distribusi Tugas per Aktor</h3>
+                    <div class="chart-container">
+                        <canvas id="actorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500">
+            <p>&copy; 2025 Visualisasi Data SIKeuDes. Dibuat untuk tujuan demonstrasi.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const processData = {
+                stages: [
+                    {
+                        name: "Tahap 1: Perencanaan",
+                        steps: [
+                            { id: 1, name: "Input Usulan Musrenbangdes", actors: ["Operator Desa"], process: "Operator memasukkan semua usulan kegiatan hasil musyawarah desa ke dalam sistem, lengkap dengan perkiraan lokasi dan pagu anggaran.", output: "Daftar usulan kegiatan digital." },
+                            { id: 2, name: "Penyusunan Rancangan RKPDes", actors: ["Operator Desa", "Tim Perencana"], process: "Berdasarkan usulan yang masuk, tim perencana menyusun prioritas kegiatan untuk satu tahun ke depan dalam bentuk draf RKPDes di dalam sistem.", output: "Draf RKPDes." },
+                            { id: 3, name: "Verifikasi & Penetapan RKPDes", actors: ["Sekdes", "Kades", "BPD"], process: "Sekdes memverifikasi draf, kemudian Kades dan BPD membahas dan menyepakati RKPDes. Kades memberikan persetujuan akhir (otorisasi) di sistem.", output: "Dokumen RKPDes final yang terkunci." },
+                        ]
+                    },
+                    {
+                        name: "Tahap 2: Penganggaran",
+                        steps: [
+                            { id: 4, name: "Penyusunan Rancangan APBDes", actors: ["Operator Desa"], process: "Operator menginput target pendapatan dan melengkapi Rincian Anggaran Biaya (RAB) untuk setiap kegiatan yang ditarik otomatis dari RKPDes.", output: "Draf R-APBDes." },
+                            { id: 5, name: "Verifikasi & Pembahasan R-APBDes", actors: ["Sekdes", "Kades", "BPD"], process: "Sekdes memverifikasi, kemudian Kades bersama BPD membahas R-APBDes hingga disepakati.", output: "R-APBDes yang disepakati." },
+                            { id: 6, name: "Evaluasi oleh Kecamatan", actors: ["Verifikator Kecamatan"], process: "Draf APBDes dikirim secara digital untuk dievaluasi oleh pihak kecamatan. Hasil evaluasi diinput kembali ke sistem.", output: "Catatan hasil evaluasi." },
+                            { id: 7, name: "Penetapan APBDes", actors: ["Kades"], process: "Setelah evaluasi selesai, Kades memberikan otorisasi akhir untuk menetapkan APBDes.", output: "Dokumen APBDes final." },
+                        ]
+                    },
+                    {
+                        name: "Tahap 3: Pelaksanaan",
+                        steps: [
+                            { id: 8, name: "Pengajuan SPP", actors: ["Pelaksana Kegiatan"], process: "Pelaksana kegiatan membuat Surat Permintaan Pembayaran (SPP) di sistem untuk memulai kegiatan.", output: "Dokumen SPP." },
+                            { id: 9, name: "Verifikasi & Persetujuan SPP", actors: ["Sekdes", "Kades"], process: "Sekdes memverifikasi SPP. Jika valid, Kades menyetujui dan sistem otomatis membuat Surat Perintah Pencairan Dana (SP2D).", output: "Dokumen SP2D." },
+                            { id: 10, name: "Pencatatan Transaksi Harian", actors: ["Bendahara Desa"], process: "Berdasarkan SP2D, Bendahara melakukan pembayaran/menerima pendapatan dan langsung menginput detail transaksi ke dalam sistem.", output: "Data transaksi tercatat." },
+                            { id: 11, name: "Pembukuan Otomatis", actors: ["Sistem"], process: "Setiap transaksi yang disimpan, sistem otomatis memperbarui BKU, Buku Pembantu Kas, Buku Kegiatan, dan Buku Pajak.", output: "Buku-buku kas yang ter-update." },
+                        ]
+                    },
+                    {
+                        name: "Tahap 4: Pelaporan",
+                        steps: [
+                            { id: 12, name: "Generate Laporan Otomatis", actors: ["Kades", "Operator Desa"], process: "Pengguna masuk ke modul pelaporan, memilih jenis laporan dan periode yang diinginkan.", output: "Request laporan." },
+                            { id: 13, name: "Laporan Siap Saji", actors: ["Sistem"], process: "Sistem menampilkan laporan lengkap yang membandingkan Anggaran vs. Realisasi. Laporan dapat diekspor ke PDF/Excel.", output: "Laporan Realisasi / Pertanggungjawaban." },
+                            { id: 14, name: "Pengesahan & Penyerahan", actors: ["Kades", "Sekdes"], process: "Laporan diverifikasi dan disahkan, kemudian siap diserahkan kepada BPD dan pihak kecamatan.", output: "Laporan yang sah." },
+                        ]
+                    },
+                    {
+                        name: "Tahap 5: Monitoring",
+                        steps: [
+                            { id: 15, name: "Dasbor Eksekutif (Internal)", actors: ["Kades", "Sekdes", "BPD"], process: "Memantau grafik serapan anggaran, realisasi per kegiatan, dan status keuangan desa secara real-time.", output: "Informasi untuk pengambilan keputusan." },
+                            { id: 16, name: "Portal Transparansi (Publik)", actors: ["Masyarakat", "Sistem"], process: "Sistem otomatis mempublikasikan ringkasan APBDes dan Laporan Realisasi dalam bentuk infografis yang mudah dipahami di website desa.", output: "Informasi keuangan publik." },
+                        ]
+                    }
+                ]
+            };
+
+            const processFlowContainer = document.getElementById('processFlow');
+            const detailContent = document.getElementById('detailContent');
+            const actorFilter = document.getElementById('actorFilter');
+            const actorChartCanvas = document.getElementById('actorChart').getContext('2d');
+            let actorChart;
+
+            let allActors = new Set();
+            processData.stages.forEach(stage => {
+                stage.steps.forEach(step => {
+                    step.actors.forEach(actor => allActors.add(actor));
+                });
+            });
+            
+            const sortedActors = Array.from(allActors).sort();
+            sortedActors.forEach(actor => {
+                const option = document.createElement('option');
+                option.value = actor;
+                option.textContent = actor;
+                actorFilter.appendChild(option);
+            });
+
+            function renderProcessFlow() {
+                processFlowContainer.innerHTML = '';
+                processData.stages.forEach((stage, stageIndex) => {
+                    const stageDiv = document.createElement('div');
+                    stageDiv.className = 'stage-container bg-gray-50 rounded-xl p-4 border border-gray-200';
+                    
+                    const stageTitle = document.createElement('h3');
+                    stageTitle.className = 'text-lg font-bold text-center mb-4 text-gray-700';
+                    stageTitle.textContent = stage.name;
+                    stageDiv.appendChild(stageTitle);
+
+                    const stepsContainer = document.createElement('div');
+                    stepsContainer.className = 'space-y-3';
+                    
+                    stage.steps.forEach(step => {
+                        const stepCard = document.createElement('div');
+                        stepCard.className = 'step-card bg-white p-3 rounded-lg border-2 border-gray-200 shadow-sm';
+                        stepCard.dataset.id = step.id;
+
+                        const stepName = document.createElement('p');
+                        stepName.className = 'font-semibold text-gray-800';
+                        stepName.textContent = step.name;
+                        stepCard.appendChild(stepName);
+
+                        const stepActors = document.createElement('p');
+                        stepActors.className = 'text-xs text-gray-500 mt-1';
+                        stepActors.textContent = 'Aktor: ' + step.actors.join(', ');
+                        stepCard.appendChild(stepActors);
+                        
+                        stepsContainer.appendChild(stepCard);
+                    });
+                    
+                    stageDiv.appendChild(stepsContainer);
+                    processFlowContainer.appendChild(stageDiv);
+
+                    if (stageIndex < processData.stages.length - 1) {
+                        const arrow = document.createElement('div');
+                        arrow.className = 'flow-arrow self-center mx-4 hidden lg:block';
+                        arrow.innerHTML = '&#8594;';
+                        processFlowContainer.appendChild(arrow);
+                    }
+                });
+            }
+
+            function updateDetailPanel(stepId) {
+                let selectedStep = null;
+                for (const stage of processData.stages) {
+                    const foundStep = stage.steps.find(s => s.id == stepId);
+                    if (foundStep) {
+                        selectedStep = foundStep;
+                        break;
+                    }
+                }
+
+                if (selectedStep) {
+                    detailContent.innerHTML = `
+                        <h3 class="text-2xl font-bold text-emerald-600 mb-4">${selectedStep.name}</h3>
+                        <div class="text-left space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-gray-700">👤 Aktor Terlibat</h4>
+                                <p class="text-gray-600">${selectedStep.actors.join(', ')}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">⚙️ Proses</h4>
+                                <p class="text-gray-600">${selectedStep.process}</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">📄 Output</h4>
+                                <p class="text-gray-600">${selectedStep.output}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            function updateChart(selectedActor = 'Semua') {
+                if (actorChart) {
+                    actorChart.destroy();
+                }
+
+                const taskCounts = {};
+                sortedActors.forEach(actor => taskCounts[actor] = 0);
+
+                processData.stages.forEach(stage => {
+                    stage.steps.forEach(step => {
+                        step.actors.forEach(actor => {
+                            if (taskCounts[actor] !== undefined) {
+                                taskCounts[actor]++;
+                            }
+                        });
+                    });
+                });
+
+                let labels, data, backgroundColors;
+
+                if (selectedActor === 'Semua') {
+                    labels = sortedActors;
+                    data = Object.values(taskCounts);
+                    backgroundColors = [
+                        '#34D399', '#A78BFA', '#FBBF24', '#60A5FA', '#F87171', '#FB923C', '#4ADE80', '#818CF8', '#FCD34D'
+                    ];
+                } else {
+                    const totalTasks = processData.stages.flatMap(s => s.steps).length;
+                    const actorTasks = taskCounts[selectedActor];
+                    labels = [selectedActor, 'Aktor Lainnya'];
+                    data = [actorTasks, totalTasks - actorTasks];
+                    backgroundColors = ['#10B981', '#E5E7EB'];
+                }
+
+                actorChart = new Chart(actorChartCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Jumlah Tugas',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: '#fdfbf8',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 12,
+                                    padding: 20
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            processFlowContainer.addEventListener('click', function(e) {
+                const card = e.target.closest('.step-card');
+                if (!card) return;
+
+                document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateDetailPanel(card.dataset.id);
+            });
+
+            actorFilter.addEventListener('change', function(e) {
+                const selectedActor = e.target.value;
+                document.querySelectorAll('.step-card').forEach(card => {
+                    card.classList.remove('highlight');
+                    if (selectedActor !== 'Semua') {
+                        const stepId = card.dataset.id;
+                        const step = processData.stages.flatMap(s => s.steps).find(s => s.id == stepId);
+                        if (step && step.actors.includes(selectedActor)) {
+                            card.classList.add('highlight');
+                        }
+                    }
+                });
+                updateChart(selectedActor);
+            });
+
+            renderProcessFlow();
+            updateChart();
+        });
+    </script>
+</body>
+</html>

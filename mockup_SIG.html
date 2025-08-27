@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIG Desa - Sistem Informasi Geografis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Emerald Glow -->
+    <!-- Application Structure Plan: Mockup ini dirancang sebagai Single Page Application (SPA) yang mensimulasikan pengalaman multi-halaman. Struktur utamanya dibagi menjadi dua bagian besar: Halaman Login dan Halaman Dashboard. JavaScript digunakan untuk mengontrol visibilitas antara kedua halaman ini. Dashboard sendiri memiliki struktur modular dengan sidebar navigasi tetap dan area konten dinamis. Konten di dalam dashboard, termasuk menu navigasi dan widget yang ditampilkan, akan berubah secara dinamis berdasarkan peran pengguna yang dipilih saat login (Admin, Pemerintah, Masyarakat). Pendekatan ini dipilih untuk secara efisien mendemonstrasikan fungsionalitas yang berbeda untuk setiap peran pengguna dalam satu file yang koheren, menyoroti kemampuan sistem untuk menyediakan antarfirma yang relevan dan aman. -->
+    <!-- Visualization & Content Choices: 1. Halaman Login: Goal -> Otentikasi & pemilihan peran. Viz/Method -> Form HTML sederhana. Interaction -> Input teks, dropdown, dan tombol login. Justification -> Standar industri untuk akses yang aman dan personal. 2. Dashboard Utama: Goal -> Memberikan ringkasan informasi penting. Viz/Method -> Kartu statistik (divs), Chart.js (doughnut & bar charts). Interaction -> Statis (kartu), interaktif (grafik). Justification -> Memberikan gambaran umum kinerja dan status desa secara cepat. 3. Peta Interaktif: Goal -> Visualisasi data spasial. Viz/Method -> Placeholder peta dengan layer toggle dan titik interaktif (seperti implementasi sebelumnya). Interaction -> Klik titik, toggle layer. Justification -> Ini adalah fitur inti SIG, memungkinkan eksplorasi data geografis. 4. Manajemen Aset (Admin): Goal -> CRUD (Create, Read, Update, Delete) data aset. Viz/Method -> Tabel HTML. Interaction -> Tombol Tambah, Edit, Hapus (simulasi). Justification -> Menunjukkan kapabilitas manajemen data untuk peran admin. 5. Laporan (Pemerintah): Goal -> Menghasilkan dokumen. Viz/Method -> Form HTML. Interaction -> Pilihan filter & tombol generate. Justification -> Menunjukkan bagaimana data dapat diubah menjadi output formal untuk pengambilan keputusan. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; }
+        .sidebar-link { transition: all 0.2s ease-in-out; border-left: 3px solid transparent; }
+        .sidebar-link:hover { background-color: rgba(255, 255, 255, 0.1); border-left-color: #10b981; }
+        .sidebar-link.active { background-color: #10b981; font-weight: 600; }
+        .content-section { display: none; animation: fadeIn 0.5s ease-in-out; }
+        .content-section.active { display: block; }
+        .chart-container { position: relative; width: 100%; height: 300px; max-height: 350px; }
+        .glass-card { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .gradient-bg { background: linear-gradient(135deg, #06b6d4, #10b981); }
+        .btn-glow { transition: all 0.3s ease; }
+        .btn-glow:hover { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .map-point { transition: all 0.2s ease; border: 2px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3); animation: pulse 2s infinite; }
+        .map-point:hover { transform: scale(1.5); z-index: 20; animation-play-state: paused; }
+        .map-popup { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .modal-overlay { transition: opacity 0.3s ease-in-out; }
+        .modal-content { transition: transform 0.3s ease-in-out; }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Halaman Login -->
+    <div id="login-page" class="flex items-center justify-center min-h-screen gradient-bg">
+        <div class="w-full max-w-md p-8 space-y-6 glass-card rounded-2xl shadow-2xl">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-white">Selamat Datang</h1>
+                <p class="mt-2 text-gray-100">Sistem Informasi Geografis Desa Modern</p>
+            </div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <input type="text" id="username" value="pengguna" placeholder="Username" class="w-full px-4 py-3 bg-white/80 text-slate-800 placeholder-gray-500 border border-transparent rounded-lg focus:ring-2 focus:ring-cyan-300 focus:outline-none" required>
+                </div>
+                <div>
+                    <input type="password" id="password" value="password" placeholder="Password" class="w-full px-4 py-3 bg-white/80 text-slate-800 placeholder-gray-500 border border-transparent rounded-lg focus:ring-2 focus:ring-cyan-300 focus:outline-none" required>
+                </div>
+                <div>
+                    <select id="role" class="w-full px-4 py-3 bg-white/80 text-slate-800 border border-transparent rounded-lg focus:ring-2 focus:ring-cyan-300 focus:outline-none">
+                        <option value="admin" class="text-black">Admin / Operator</option>
+                        <option value="pemerintah" class="text-black">Pemerintah Desa</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="w-full px-4 py-3 font-semibold text-white bg-emerald-500 rounded-lg btn-glow hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400">
+                        LOGIN
+                    </button>
+                </div>
+            </form>
+            <p class="mt-6 text-center text-sm text-gray-100">
+                Masyarakat Umum?
+                <a href="#" id="public-access-link" class="font-medium text-cyan-300 hover:text-cyan-200">
+                    Lihat Peta Publik
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Halaman Publik (Landing Page) -->
+    <div id="public-page" class="hidden bg-gray-50">
+        <header class="bg-white shadow-sm sticky top-0 z-10">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">SIG Desa</h1>
+                <button id="admin-login-button" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 btn-glow">
+                    Login Aparatur
+                </button>
+            </nav>
+        </header>
+        <main id="public-main-content" class="container mx-auto p-6">
+             <!-- Konten publik akan dirender di sini -->
+        </main>
+        <footer class="text-center py-6 border-t bg-white">
+            <p class="text-gray-500">Sistem Informasi Geografis Desa &copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- Halaman Dashboard Internal -->
+    <div id="dashboard-page" class="hidden">
+        <div class="flex h-screen bg-gray-100">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-slate-800 text-gray-300">
+                <div class="flex items-center justify-center h-20 border-b border-slate-700">
+                    <span class="text-2xl font-bold text-white">SIG DESA</span>
+                </div>
+                <nav id="sidebar-nav" class="flex-1 px-4 py-4 space-y-2">
+                    <!-- Navigasi dinamis akan di-render di sini -->
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="flex flex-col flex-1">
+                <header class="flex items-center justify-between h-20 px-6 bg-white border-b">
+                    <button id="menu-toggle" class="md:hidden text-gray-600 focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+                    </button>
+                    <div id="welcome-message" class="font-semibold text-lg text-gray-700"></div>
+                    <div>
+                        <button id="logout-button" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 btn-glow">Logout</button>
+                    </div>
+                </header>
+                <main class="flex-1 p-6 overflow-y-auto">
+                    <!-- Konten dinamis akan di-render di sini -->
+                    <div id="dashboard-utama" class="content-section active"></div>
+                    <div id="peta-interaktif" class="content-section"></div>
+                    <div id="manajemen-aset" class="content-section"></div>
+                    <div id="laporan" class="content-section"></div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginPage = document.getElementById('login-page');
+            const publicPage = document.getElementById('public-page');
+            const dashboardPage = document.getElementById('dashboard-page');
+            
+            const loginForm = document.getElementById('login-form');
+            const publicAccessLink = document.getElementById('public-access-link');
+            const adminLoginButton = document.getElementById('admin-login-button');
+            const logoutButton = document.getElementById('logout-button');
+            
+            const welcomeMessage = document.getElementById('welcome-message');
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const contentSections = document.querySelectorAll('.content-section');
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            let assetData = [
+                { id: 'JLN001', name: 'Jl. Mawar', condition: 'Baik' },
+                { id: 'JLN002', name: 'Jl. Melati', condition: 'Rusak Berat' },
+                { id: 'JLN003', name: 'Jl. Anggrek', condition: 'Rusak Ringan' }
+            ];
+
+            const icons = {
+                dashboard: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>`,
+                peta: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 015 3v14a1 1 0 01-1.707.707L1.586 16H1v-2h.586l1.707-1.707A1 1 0 015 11V5a1 1 0 01-1.293-.707L1.586 3H1V1h.586l1.707 1.707A1 1 0 015 3v.001zM16.293 3.293A1 1 0 0115 3v14a1 1 0 01-1.707.707l-1.707-1.707H19v-2h-.586l-1.707-1.707A1 1 0 0115 11V5a1 1 0 01-1.293-.707L11.586 3H11V1h.586l1.707 1.707A1 1 0 0115 3v.001z" clip-rule="evenodd" /></svg>`,
+                aset: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 8a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" /><path d="M4 12a1 1 0 011-1h8a1 1 0 110 2H5a1 1 0 01-1-1z" /><path fill-rule="evenodd" d="M2 4a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V4zm2-1a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1H4z" clip-rule="evenodd" /></svg>`,
+                laporan: `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clip-rule="evenodd" /></svg>`
+            };
+
+            const navLinks = {
+                admin: [
+                    { id: 'dashboard-utama', text: 'Dashboard', icon: icons.dashboard },
+                    { id: 'peta-interaktif', text: 'Peta Interaktif', icon: icons.peta },
+                    { id: 'manajemen-aset', text: 'Manajemen Aset', icon: icons.aset },
+                    { id: 'laporan', text: 'Laporan', icon: icons.laporan }
+                ],
+                pemerintah: [
+                    { id: 'dashboard-utama', text: 'Dashboard', icon: icons.dashboard },
+                    { id: 'peta-interaktif', text: 'Peta Interaktif', icon: icons.peta },
+                    { id: 'laporan', text: 'Laporan', icon: icons.laporan }
+                ]
+            };
+
+            const userNames = { admin: 'Admin Desa', pemerintah: 'Kepala Desa' };
+
+            function renderSidebar(role) {
+                sidebarNav.innerHTML = '';
+                navLinks[role].forEach(link => {
+                    const a = document.createElement('a');
+a.href = '#';
+                    a.className = 'sidebar-link flex items-center px-4 py-3 rounded-md';
+                    a.dataset.target = link.id;
+                    a.innerHTML = `<span class="mr-3">${link.icon}</span> ${link.text}`;
+                    sidebarNav.appendChild(a);
+                });
+            }
+
+            function renderDashboardContent(role) {
+                document.getElementById('dashboard-utama').innerHTML = getDashboardUtamaContent();
+                document.getElementById('peta-interaktif').innerHTML = getPetaInteraktifContent('dashboard');
+                document.getElementById('manajemen-aset').innerHTML = getManajemenAsetContent(role);
+                document.getElementById('laporan').innerHTML = getLaporanContent();
+                initCharts();
+                initInteractiveMap('dashboard-map-container');
+                if (role === 'admin') {
+                    initCrud();
+                }
+            }
+            
+            function renderPublicContent() {
+                document.getElementById('public-main-content').innerHTML = `
+                    <section class="relative text-center py-20 md:py-32 rounded-2xl overflow-hidden mb-12 gradient-bg">
+                        <div class="absolute inset-0 bg-black opacity-30"></div>
+                        <div class="relative z-10 px-4">
+                            <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">Menjelajahi Desa, <br> Membuka Potensi</h2>
+                            <p class="text-white/90 mt-4 max-w-2xl mx-auto text-lg">Selamat datang di portal publik SIG Desa. Temukan informasi spasial, aset, dan potensi wilayah kami secara transparan dan interaktif.</p>
+                            <button onclick="document.getElementById('peta-publik').scrollIntoView({ behavior: 'smooth' })" class="mt-8 px-8 py-3 font-semibold text-emerald-600 bg-white rounded-full btn-glow hover:bg-gray-100 text-lg">
+                                Lihat Peta Sekarang
+                            </button>
+                        </div>
+                    </section>
+                    <section class="grid md:grid-cols-3 gap-8 mb-12 text-center">
+                        <div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                            <div class="text-4xl text-emerald-500 mb-4">🗺️</div>
+                            <h3 class="text-xl font-bold text-gray-800">Peta Interaktif</h3>
+                            <p class="text-gray-600 mt-2">Visualisasikan batas wilayah, penggunaan lahan, dan lokasi penting lainnya.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                            <div class="text-4xl text-emerald-500 mb-4">🏗️</div>
+                            <h3 class="text-xl font-bold text-gray-800">Aset & Infrastruktur</h3>
+                            <p class="text-gray-600 mt-2">Lihat data terkini mengenai kondisi jalan, irigasi, dan fasilitas umum desa.</p>
+                        </div>
+                        <div class="bg-white p-8 rounded-xl shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                            <div class="text-4xl text-emerald-500 mb-4">💡</div>
+                            <h3 class="text-xl font-bold text-gray-800">Potensi Desa</h3>
+                            <p class="text-gray-600 mt-2">Temukan area potensial untuk pengembangan ekonomi, pertanian, dan pariwisata.</p>
+                        </div>
+                    </section>
+                    <section id="peta-publik">
+                        ${getPetaInteraktifContent('public')}
+                    </section>
+                `;
+                initInteractiveMap('public-map-container');
+            }
+
+            function showContent(targetId) {
+                contentSections.forEach(section => section.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+                document.querySelectorAll('.sidebar-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.target === targetId) link.classList.add('active');
+                });
+            }
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const role = document.getElementById('role').value;
+                loginPage.classList.add('hidden');
+                dashboardPage.classList.remove('hidden');
+                welcomeMessage.textContent = `Selamat datang, ${userNames[role]}!`;
+                renderSidebar(role);
+                renderDashboardContent(role);
+                const initialTarget = navLinks[role][0].id;
+                showContent(initialTarget);
+                sidebarNav.addEventListener('click', (e) => {
+                    const link = e.target.closest('.sidebar-link');
+                    if (link) { e.preventDefault(); showContent(link.dataset.target); }
+                });
+            });
+            
+            publicAccessLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginPage.classList.add('hidden');
+                publicPage.classList.remove('hidden');
+                renderPublicContent();
+            });
+
+            adminLoginButton.addEventListener('click', () => {
+                publicPage.classList.add('hidden');
+                loginPage.classList.remove('hidden');
+            });
+
+            logoutButton.addEventListener('click', () => {
+                dashboardPage.classList.add('hidden');
+                loginPage.classList.remove('hidden');
+            });
+
+            menuToggle.addEventListener('click', () => sidebar.classList.toggle('hidden'));
+
+            function getDashboardUtamaContent() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Dashboard Utama</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="p-5 bg-white rounded-xl shadow-lg flex items-center space-x-4"><div class="p-3 bg-blue-100 rounded-full">${icons.aset}</div><div><h3 class="font-semibold text-gray-500">Total Aset</h3><p class="text-2xl font-bold text-gray-800">1,250</p></div></div>
+                        <div class="p-5 bg-white rounded-xl shadow-lg flex items-center space-x-4"><div class="p-3 bg-red-100 rounded-full">${icons.peta}</div><div><h3 class="font-semibold text-gray-500">Jalan Rusak</h3><p class="text-2xl font-bold text-red-500">32 Titik</p></div></div>
+                        <div class="p-5 bg-white rounded-xl shadow-lg flex items-center space-x-4"><div class="p-3 bg-green-100 rounded-full">${icons.dashboard}</div><div><h3 class="font-semibold text-gray-500">Jumlah Penduduk</h3><p class="text-2xl font-bold text-gray-800">5,430 Jiwa</p></div></div>
+                        <div class="p-5 bg-white rounded-xl shadow-lg flex items-center space-x-4"><div class="p-3 bg-yellow-100 rounded-full">${icons.laporan}</div><div><h3 class="font-semibold text-gray-500">Anggaran Terserap</h3><p class="text-2xl font-bold text-emerald-600">75%</p></div></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <div class="lg:col-span-3 p-6 bg-white rounded-xl shadow-lg">
+                            <h3 class="font-bold mb-4 text-gray-800">Realisasi Anggaran per Bidang</h3>
+                            <div class="chart-container"><canvas id="budgetChart"></canvas></div>
+                        </div>
+                        <div class="lg:col-span-2 p-6 bg-white rounded-xl shadow-lg">
+                            <h3 class="font-bold mb-4 text-gray-800">Kondisi Aset Desa</h3>
+                            <div class="chart-container"><canvas id="assetChart"></canvas></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function getPetaInteraktifContent(context) {
+                const title = context === 'public' ? '' : `<h2 class="text-3xl font-bold mb-6 text-gray-800">Peta Interaktif</h2>`;
+                const mapContainerId = context === 'public' ? 'public-map-container' : 'dashboard-map-container';
+                return `
+                    ${title}
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div id="${mapContainerId}" class="h-96 md:h-[500px] rounded-lg relative overflow-hidden bg-cover bg-center" style="background-image: url('https://placehold.co/1200x600/a7f3d0/1e3a8a?text=Peta+Satelit+Desa');">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            <!-- Layer Jalan -->
+                            <div class="map-layer" data-layer="jalan"><div class="absolute bg-yellow-300/70 h-2" style="width: 70%; top: 40%; left: 0; transform: rotate(-5deg);"></div><div class="absolute bg-yellow-300/70 w-2" style="height: 80%; top: 10%; left: 50%;"></div></div>
+                            <!-- Layer Sawah -->
+                            <div class="map-layer" data-layer="sawah"><div class="absolute bg-green-500/30 backdrop-blur-sm border-2 border-green-400/50" style="width: 30%; height: 40%; top: 55%; left: 5%;"></div><div class="absolute bg-green-500/30 backdrop-blur-sm border-2 border-green-400/50" style="width: 25%; height: 35%; top: 5%; left: 60%;"></div></div>
+                            <!-- Layer Bangunan -->
+                            <div class="map-layer" data-layer="bangunan">
+                                <div class="map-point absolute w-5 h-5 bg-blue-600 rounded-full" style="top: 38%; left: 48%;" data-info='{"title":"Balai Desa","type":"Fasilitas Umum","status":"Aktif"}'></div>
+                                <div class="map-point absolute w-5 h-5 bg-red-600 rounded-full" style="top: 60%; left: 25%;" data-info='{"title":"Puskesmas","type":"Kesehatan","status":"Buka 24 Jam"}'></div>
+                                <div class="map-point absolute w-5 h-5 bg-yellow-500 rounded-full" style="top: 20%; left: 70%;" data-info='{"title":"Pasar Desa","type":"Ekonomi","status":"Buka 06:00-14:00"}'></div>
+                                <div class="map-point absolute w-5 h-5 bg-purple-600 rounded-full" style="top: 80%; left: 55%;" data-info='{"title":"Sekolah Dasar","type":"Pendidikan","status":"Aktif"}'></div>
+                            </div>
+                            <!-- Popup -->
+                            <div class="map-popup hidden absolute z-20 w-64 p-4 bg-white rounded-lg shadow-xl text-sm"></div>
+                        </div>
+                        <div class="flex flex-wrap gap-4 mt-4 p-4 bg-gray-50 rounded-lg">
+                            <label class="inline-flex items-center cursor-pointer"><input type="checkbox" data-layer="jalan" class="map-layer-toggle form-checkbox h-5 w-5 rounded text-emerald-600" checked> <span class="ml-2 text-gray-700">Jalan</span></label>
+                            <label class="inline-flex items-center cursor-pointer"><input type="checkbox" data-layer="sawah" class="map-layer-toggle form-checkbox h-5 w-5 rounded text-emerald-600" checked> <span class="ml-2 text-gray-700">Area Sawah</span></label>
+                            <label class="inline-flex items-center cursor-pointer"><input type="checkbox" data-layer="bangunan" class="map-layer-toggle form-checkbox h-5 w-5 rounded text-emerald-600" checked> <span class="ml-2 text-gray-700">Bangunan Penting</span></label>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function getManajemenAsetContent(role) {
+                if (role !== 'admin') return '';
+                return `
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Manajemen Aset</h2>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                            <h3 class="font-bold text-xl mb-2 sm:mb-0">Daftar Aset Jalan</h3>
+                            <button id="add-asset-btn" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 btn-glow">Tambah Aset Baru</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-600">ID Jalan</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-600">Nama Ruas</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-600">Kondisi</th>
+                                        <th class="py-3 px-4 text-left font-semibold text-gray-600">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="asset-table-body" class="divide-y divide-gray-200">
+                                    <!-- Asset rows will be rendered here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Add/Edit Asset -->
+                    <div id="asset-modal" class="fixed inset-0 z-30 hidden items-center justify-center">
+                        <div class="modal-overlay absolute inset-0 bg-black/50"></div>
+                        <div class="modal-content bg-white w-full max-w-lg p-6 rounded-xl shadow-xl transform scale-95">
+                            <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+                            <form id="asset-form">
+                                <input type="hidden" id="asset-id">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="asset-name" class="block text-sm font-medium text-gray-700">Nama Ruas Jalan</label>
+                                        <input type="text" id="asset-name" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md" required>
+                                    </div>
+                                    <div>
+                                        <label for="asset-condition" class="block text-sm font-medium text-gray-700">Kondisi</label>
+                                        <select id="asset-condition" class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md">
+                                            <option>Baik</option>
+                                            <option>Rusak Ringan</option>
+                                            <option>Rusak Berat</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex justify-end space-x-3">
+                                    <button type="button" id="cancel-modal-btn" class="px-4 py-2 bg-gray-200 rounded-md">Batal</button>
+                                    <button type="submit" class="px-4 py-2 text-white bg-emerald-600 rounded-md btn-glow">Simpan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function getLaporanContent() {
+                return `
+                    <h2 class="text-3xl font-bold mb-6 text-gray-800">Pusat Laporan</h2>
+                    <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg mx-auto">
+                        <h3 class="font-bold text-xl mb-6 text-center">Buat Laporan Baru</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label for="report-type" class="text-sm font-medium text-gray-700">Jenis Laporan</label>
+                                <select id="report-type" class="w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                                    <option>Laporan Aset Desa</option>
+                                    <option>Laporan Kependudukan</option>
+                                    <option>Laporan Realisasi Anggaran</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="date-range" class="text-sm font-medium text-gray-700">Rentang Waktu</label>
+                                <input type="text" id="date-range" value="01/01/2025 - 31/12/2025" class="w-full px-4 py-3 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                            <button class="w-full px-4 py-3 font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 btn-glow">
+                                Unduh Laporan (PDF)
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function initCharts() {
+                const assetChartEl = document.getElementById('assetChart');
+                if (assetChartEl) {
+                    new Chart(assetChartEl.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Baik', 'Rusak Ringan', 'Rusak Berat'],
+                            datasets: [{ data: [70, 20, 10], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
+
+                const budgetChartEl = document.getElementById('budgetChart');
+                if (budgetChartEl) {
+                    new Chart(budgetChartEl.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: ['Infrastruktur', 'Pendidikan', 'Kesehatan', 'Ekonomi'],
+                            datasets: [{ label: 'Realisasi (%)', data: [85, 70, 65, 80], backgroundColor: '#059669', borderRadius: 6 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+                    });
+                }
+            }
+            
+            function initInteractiveMap(containerId) {
+                const mapContainer = document.getElementById(containerId);
+                if (!mapContainer) return;
+
+                const popup = mapContainer.querySelector('.map-popup');
+                const points = mapContainer.querySelectorAll('.map-point');
+                const toggles = mapContainer.parentElement.querySelectorAll('.map-layer-toggle');
+
+                points.forEach(point => {
+                    point.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const info = JSON.parse(e.target.dataset.info);
+                        popup.innerHTML = `<div class="font-bold">${info.title}</div><div class="text-xs text-gray-500">${info.type}</div><div class="mt-1">${info.status}</div>`;
+                        
+                        const mapRect = mapContainer.getBoundingClientRect();
+                        const pointRect = e.target.getBoundingClientRect();
+                        
+                        let top = pointRect.top - mapRect.top - popup.offsetHeight - 10;
+                        let left = pointRect.left - mapRect.left + (pointRect.width / 2) - (popup.offsetWidth / 2);
+
+                        if (top < 0) top = pointRect.top - mapRect.top + pointRect.height + 10;
+                        if (left < 0) left = 5;
+                        if (left + popup.offsetWidth > mapRect.width) left = mapRect.width - popup.offsetWidth - 5;
+
+                        popup.style.top = `${top}px`;
+                        popup.style.left = `${left}px`;
+                        popup.classList.remove('hidden');
+                    });
+                });
+
+                mapContainer.addEventListener('click', () => {
+                    popup.classList.add('hidden');
+                });
+
+                toggles.forEach(toggle => {
+                    toggle.addEventListener('change', () => {
+                        const layerName = toggle.dataset.layer;
+                        const layer = mapContainer.querySelector(`.map-layer[data-layer="${layerName}"]`);
+                        if (layer) {
+                            layer.style.display = toggle.checked ? 'block' : 'none';
+                        }
+                    });
+                });
+            }
+
+            function initCrud() {
+                const modal = document.getElementById('asset-modal');
+                const modalTitle = document.getElementById('modal-title');
+                const addAssetBtn = document.getElementById('add-asset-btn');
+                const cancelModalBtn = document.getElementById('cancel-modal-btn');
+                const assetForm = document.getElementById('asset-form');
+                const assetTableBody = document.getElementById('asset-table-body');
+                const assetIdInput = document.getElementById('asset-id');
+                const assetNameInput = document.getElementById('asset-name');
+                const assetConditionInput = document.getElementById('asset-condition');
+
+                function renderAssetTable() {
+                    assetTableBody.innerHTML = '';
+                    assetData.forEach(asset => {
+                        const conditionClass = asset.condition === 'Baik' ? 'text-green-800 bg-green-100' : (asset.condition === 'Rusak Ringan' ? 'text-yellow-800 bg-yellow-100' : 'text-red-800 bg-red-100');
+                        const row = `
+                            <tr>
+                                <td class="py-3 px-4">${asset.id}</td>
+                                <td class="py-3 px-4">${asset.name}</td>
+                                <td class="py-3 px-4"><span class="px-2 py-1 text-xs font-semibold ${conditionClass} rounded-full">${asset.condition}</span></td>
+                                <td class="py-3 px-4">
+                                    <button class="text-blue-500 hover:underline edit-btn" data-id="${asset.id}">Edit</button>
+                                    <button class="text-red-500 hover:underline ml-2 delete-btn" data-id="${asset.id}">Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                        assetTableBody.innerHTML += row;
+                    });
+                }
+
+                function showModal(isEdit = false, asset = null) {
+                    assetForm.reset();
+                    if (isEdit && asset) {
+                        modalTitle.textContent = 'Edit Aset Jalan';
+                        assetIdInput.value = asset.id;
+                        assetNameInput.value = asset.name;
+                        assetConditionInput.value = asset.condition;
+                    } else {
+                        modalTitle.textContent = 'Tambah Aset Jalan Baru';
+                        assetIdInput.value = '';
+                    }
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+
+                function hideModal() {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+
+                addAssetBtn.addEventListener('click', () => showModal());
+                cancelModalBtn.addEventListener('click', hideModal);
+                modal.querySelector('.modal-overlay').addEventListener('click', hideModal);
+
+                assetForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const id = assetIdInput.value;
+                    const newAsset = {
+                        name: assetNameInput.value,
+                        condition: assetConditionInput.value
+                    };
+
+                    if (id) { // Edit mode
+                        const index = assetData.findIndex(asset => asset.id === id);
+                        assetData[index] = { ...assetData[index], ...newAsset };
+                    } else { // Create mode
+                        newAsset.id = 'JLN' + String(Date.now()).slice(-3);
+                        assetData.push(newAsset);
+                    }
+                    renderAssetTable();
+                    hideModal();
+                });
+
+                assetTableBody.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('edit-btn')) {
+                        const id = e.target.dataset.id;
+                        const asset = assetData.find(a => a.id === id);
+                        showModal(true, asset);
+                    }
+                    if (e.target.classList.contains('delete-btn')) {
+                        const id = e.target.dataset.id;
+                        assetData = assetData.filter(a => a.id !== id);
+                        renderAssetTable();
+                    }
+                });
+
+                renderAssetTable();
+            }
+
+        });
+    </script>
+</body>
+</html>

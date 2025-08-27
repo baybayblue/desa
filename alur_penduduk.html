@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Alur Proses SIKeuDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Earth Tones -->
+    <!-- Application Structure Plan: Aplikasi ini menggunakan struktur navigasi berbasis tab untuk memisahkan setiap modul utama (Manajemen Data, Layanan Surat, Pelaporan, dan Modul Tambahan). Pendekatan ini dipilih untuk memungkinkan pengguna fokus pada satu alur proses pada satu waktu, mengurangi kebingungan dan meningkatkan pemahaman. Setiap alur proses divisualisasikan sebagai diagram langkah-demi-langkah vertikal yang mudah diikuti. Sebuah dashboard statistik interaktif ditambahkan untuk memberikan konteks hasil dari proses-proses ini, menghubungkan alur kerja dengan output data nyata. Struktur ini lebih unggul dari dokumen linear karena mendukung eksplorasi non-linear dan pemahaman yang lebih dalam melalui visualisasi data. -->
+    <!-- Visualization & Content Choices: 
+        - Alur Proses (Tujuan: Mengorganisir): Divisualisasikan menggunakan elemen HTML (div) dan Tailwind CSS untuk membuat diagram alur vertikal. Setiap langkah adalah sebuah 'kartu' dengan ikon Unicode (👤, 💻, 📄) untuk menandai aktor yang terlibat. Ini adalah alternatif yang efektif dan responsif tanpa menggunakan SVG atau Mermaid JS.
+        - Statistik Desa (Tujuan: Menginformasikan & Membandingkan): Tiga grafik (Donat untuk gender, Bar untuk piramida penduduk, dan Bar untuk layanan surat) dibuat menggunakan Chart.js. Grafik ini memberikan ringkasan visual yang cepat dan interaktif dari data kependudukan, yang merupakan hasil dari proses yang dijelaskan.
+        - Navigasi & Interaksi (Tujuan: Keterlibatan): Tombol navigasi digunakan untuk beralih antar modul. Efek hover dan status aktif pada tombol dan langkah-langkah proses memberikan umpan balik visual kepada pengguna.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4F4A45;
+        }
+        .tab-active {
+            background-color: #A0522D;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            background-color: #EFEAE6;
+            color: #6C6661;
+        }
+        .flow-connector::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            height: 2rem;
+            border-left: 2px dashed #D1C7BF;
+            transform: translateX(-1px);
+        }
+        .flow-step:last-child .flow-connector::after {
+            display: none;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#A0522D]">Sistem Informasi Kependudukan Desa (SIKeuDes)</h1>
+            <p class="mt-2 text-lg text-gray-600">Visualisasi Interaktif Alur Proses Bisnis</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-center text-[#6B4F4F]">Aktor & Peran</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">👤</div>
+                    <h3 class="font-semibold">Penduduk</h3>
+                    <p class="text-xs text-gray-500">Penerima Layanan</p>
+                </div>
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">💻</div>
+                    <h3 class="font-semibold">Operator Desa</h3>
+                    <p class="text-xs text-gray-500">Input & Cetak</p>
+                </div>
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">🧐</div>
+                    <h3 class="font-semibold">Kaur/Kasi</h3>
+                    <p class="text-xs text-gray-500">Verifikasi Awal</p>
+                </div>
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">✍️</div>
+                    <h3 class="font-semibold">Sekdes</h3>
+                    <p class="text-xs text-gray-500">Verifikasi Lanjutan</p>
+                </div>
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">👑</div>
+                    <h3 class="font-semibold">Kepala Desa</h3>
+                    <p class="text-xs text-gray-500">Persetujuan Akhir</p>
+                </div>
+                <div class="p-3 bg-[#FDFBF8] rounded-lg">
+                    <div class="text-3xl mb-1">⚙️</div>
+                    <h3 class="font-semibold">Administrator</h3>
+                    <p class="text-xs text-gray-500">Pengelola Sistem</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <button data-tab="dashboard" class="tab-button tab-active px-4 py-2 rounded-full text-sm md:text-base transition-all duration-300">📊 Dashboard Statistik</button>
+            <button data-tab="dataManagement" class="tab-button tab-inactive px-4 py-2 rounded-full text-sm md:text-base transition-all duration-300">🗃️ Manajemen Data</button>
+            <button data-tab="letterService" class="tab-button tab-inactive px-4 py-2 rounded-full text-sm md:text-base transition-all duration-300">✉️ Layanan Surat</button>
+            <button data-tab="additionalModules" class="tab-button tab-inactive px-4 py-2 rounded-full text-sm md:text-base transition-all duration-300">🧩 Modul Tambahan</button>
+        </nav>
+
+        <main id="content-container">
+            
+            <section id="dashboard" class="tab-content">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold text-[#6B4F4F]">Dashboard Pelaporan & Statistik</h2>
+                    <p class="text-gray-600 mt-1">Visualisasi data kependudukan desa secara real-time.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-lg font-semibold text-center mb-4">Komposisi Penduduk</h3>
+                        <div class="chart-container">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-lg font-semibold text-center mb-4">Piramida Penduduk</h3>
+                         <div class="chart-container">
+                            <canvas id="agePyramidChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg lg:col-span-2">
+                        <h3 class="text-lg font-semibold text-center mb-4">Tren Layanan Surat (6 Bulan Terakhir)</h3>
+                         <div class="chart-container h-96">
+                            <canvas id="letterTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="dataManagement" class="tab-content hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold text-[#6B4F4F]">Modul 1: Manajemen Data Kependudukan</h2>
+                    <p class="text-gray-600 mt-1">Alur proses untuk memastikan data penduduk selalu akurat dan mutakhir.</p>
+                </div>
+                <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-6">1.1 Pendaftaran Penduduk Baru</h3>
+                        <div class="space-y-8">
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">👤</span></div>
+                                <p class="mt-2 font-medium">Penduduk/Pemohon</p>
+                                <p class="text-sm text-gray-500">Datang ke kantor desa membawa dokumen pendukung.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">💻</span></div>
+                                <p class="mt-2 font-medium">Operator Desa</p>
+                                <p class="text-sm text-gray-500">Input data dan unggah dokumen ke SIKeuDes.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">🧐</span></div>
+                                <p class="mt-2 font-medium">Kaur/Kasi</p>
+                                <p class="text-sm text-gray-500">Memverifikasi kesesuaian data dan dokumen.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="inline-block bg-green-100 text-green-800 rounded-full p-3"><span class="text-2xl">✅</span></div>
+                                <p class="mt-2 font-medium">Sistem (SIKeuDes)</p>
+                                <p class="text-sm text-gray-500">Data menjadi "Aktif", statistik diperbarui.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-6">1.2 Pembaruan Data</h3>
+                         <div class="space-y-8">
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">👤</span></div>
+                                <p class="mt-2 font-medium">Penduduk</p>
+                                <p class="text-sm text-gray-500">Melaporkan perubahan data dengan bukti.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">💻</span></div>
+                                <p class="mt-2 font-medium">Operator Desa</p>
+                                <p class="text-sm text-gray-500">Memperbarui data di sistem.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">🧐</span></div>
+                                <p class="mt-2 font-medium">Kaur/Kasi</p>
+                                <p class="text-sm text-gray-500">Memverifikasi perubahan data.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="inline-block bg-green-100 text-green-800 rounded-full p-3"><span class="text-2xl">🔄</span></div>
+                                <p class="mt-2 font-medium">Sistem (SIKeuDes)</p>
+                                <p class="text-sm text-gray-500">Data resmi diperbarui.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-center mb-6">1.3 Mutasi Penduduk</h3>
+                        <div class="space-y-8">
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">👤</span></div>
+                                <p class="mt-2 font-medium">Pelapor (Keluarga)</p>
+                                <p class="text-sm text-gray-500">Melaporkan kematian atau pindah keluar.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">💻</span></div>
+                                <p class="mt-2 font-medium">Operator Desa</p>
+                                <p class="text-sm text-gray-500">Mencatat mutasi di sistem.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="flow-connector"></div>
+                                <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">🧐</span></div>
+                                <p class="mt-2 font-medium">Kaur/Kasi</p>
+                                <p class="text-sm text-gray-500">Memverifikasi laporan mutasi.</p>
+                            </div>
+                            <div class="flow-step relative text-center">
+                                <div class="inline-block bg-red-100 text-red-800 rounded-full p-3"><span class="text-2xl">🗄️</span></div>
+                                <p class="mt-2 font-medium">Sistem (SIKeuDes)</p>
+                                <p class="text-sm text-gray-500">Data diarsipkan, statistik diperbarui.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="letterService" class="tab-content hidden">
+                 <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold text-[#6B4F4F]">Modul 2: Pelayanan Administrasi Surat</h2>
+                    <p class="text-gray-600 mt-1">Alur proses untuk mempercepat, menstandarisasi, dan melacak pembuatan surat.</p>
+                </div>
+                <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="space-y-8">
+                        <div class="flow-step relative text-center">
+                            <div class="flow-connector"></div>
+                            <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">👤</span></div>
+                            <p class="mt-2 font-medium">Penduduk</p>
+                            <p class="text-sm text-gray-500">Datang ke kantor desa meminta surat.</p>
+                        </div>
+                        <div class="flow-step relative text-center">
+                            <div class="flow-connector"></div>
+                            <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">💻</span></div>
+                            <p class="mt-2 font-medium">Operator Desa</p>
+                            <p class="text-sm text-gray-500">Memilih jenis surat dan mengisi data spesifik di SIKeuDes.</p>
+                        </div>
+                        <div class="flow-step relative text-center">
+                            <div class="flow-connector"></div>
+                            <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">🧐</span></div>
+                            <p class="mt-2 font-medium">Kaur/Kasi</p>
+                            <p class="text-sm text-gray-500">Memeriksa draf dan memberikan verifikasi/paraf digital.</p>
+                        </div>
+                        <div class="flow-step relative text-center">
+                            <div class="flow-connector"></div>
+                            <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">✍️</span></div>
+                            <p class="mt-2 font-medium">Sekretaris Desa</p>
+                            <p class="text-sm text-gray-500">Melakukan pengecekan akhir dan memberikan persetujuan/paraf.</p>
+                        </div>
+                        <div class="flow-step relative text-center">
+                            <div class="flow-connector"></div>
+                            <div class="inline-block bg-[#EFEAE6] rounded-full p-3"><span class="text-2xl">👑</span></div>
+                            <p class="mt-2 font-medium">Kepala Desa</p>
+                            <p class="text-sm text-gray-500">Memberikan persetujuan akhir/tanda tangan digital.</p>
+                        </div>
+                        <div class="flow-step relative text-center">
+                            <div class="inline-block bg-green-100 text-green-800 rounded-full p-3"><span class="text-2xl">📄</span></div>
+                            <p class="mt-2 font-medium">Operator Desa</p>
+                            <p class="text-sm text-gray-500">Mencetak surat final dan menyerahkan kepada penduduk.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="additionalModules" class="tab-content hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-semibold text-[#6B4F4F]">Modul Tambahan yang Direkomendasikan</h2>
+                    <p class="text-gray-600 mt-1">Fitur-fitur untuk meningkatkan fungsionalitas dan pelayanan SIKeuDes.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+                        <div class="text-4xl mb-4">🎁</div>
+                        <h3 class="text-xl font-semibold mb-2">Manajemen Bansos</h3>
+                        <p class="text-gray-600">Mengelola data penerima bantuan agar tepat sasaran, transparan, dan tidak tumpang tindih.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+                        <div class="text-4xl mb-4">📱</div>
+                        <h3 class="text-xl font-semibold mb-2">Portal Warga</h3>
+                        <p class="text-gray-600">Memberikan kemudahan bagi warga untuk mengakses layanan secara daring, termasuk pengajuan dan pelacakan surat.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+                        <div class="text-4xl mb-4">🗺️</div>
+                        <h3 class="text-xl font-semibold mb-2">Pemetaan GIS Desa</h3>
+                        <p class="text-gray-600">Memvisualisasikan data kependudukan dalam bentuk peta digital untuk perencanaan pembangunan.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => {
+                        item.classList.remove('tab-active');
+                        item.classList.add('tab-inactive');
+                    });
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('tab-inactive');
+
+                    const target = tab.getAttribute('data-tab');
+                    contents.forEach(content => {
+                        if (content.id === target) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y;
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += Math.abs(context.parsed.x);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+            };
+
+            const genderCtx = document.getElementById('genderChart').getContext('2d');
+            new Chart(genderCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Laki-laki', 'Perempuan'],
+                    datasets: [{
+                        label: 'Jumlah Penduduk',
+                        data: [1250, 1190],
+                        backgroundColor: ['#6096B4', '#D18CE0'],
+                        borderColor: '#FDFBF8',
+                        borderWidth: 4
+                    }]
+                },
+                options: chartOptions
+            });
+
+            const agePyramidCtx = document.getElementById('agePyramidChart').getContext('2d');
+            new Chart(agePyramidCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60+'],
+                    datasets: [
+                        {
+                            label: 'Laki-laki',
+                            data: [-100, -95, -90, -85, -110, -120, -115, -100, -90, -80, -70, -55, -40],
+                            backgroundColor: '#6096B4',
+                            barPercentage: 0.9,
+                            categoryPercentage: 0.9,
+                        },
+                        {
+                            label: 'Perempuan',
+                            data: [95, 90, 88, 82, 105, 115, 110, 105, 92, 85, 75, 60, 45],
+                            backgroundColor: '#D18CE0',
+                            barPercentage: 0.9,
+                            categoryPercentage: 0.9,
+                        }
+                    ]
+                },
+                options: {
+                    ...chartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return Math.abs(value);
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Jumlah Jiwa'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Kelompok Usia'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const letterTrendCtx = document.getElementById('letterTrendChart').getContext('2d');
+            new Chart(letterTrendCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus'],
+                    datasets: [{
+                        label: 'Jumlah Surat Diterbitkan',
+                        data: [45, 52, 60, 55, 75, 82],
+                        backgroundColor: '#A0522D',
+                        borderColor: '#6B4F4F',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    plugins: {
+                        legend: {
+                           display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jumlah Surat'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

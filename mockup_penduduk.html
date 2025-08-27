@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Aplikasi SIKeuDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chosen Palette: Modern Sienna -->
+    <!-- Application Structure Plan: Mengubah dari visualisasi alur menjadi mockup aplikasi fungsional. Menggunakan layout dasbor dengan sidebar navigasi untuk meniru aplikasi web modern. Setiap menu (Dashboard, Data Penduduk, Layanan Surat) akan menampilkan antarmuka yang relevan dengan tugasnya, seperti tabel data dan form input, yang secara langsung mengimplementasikan alur proses yang telah dirancang sebelumnya. -->
+    <!-- Visualization & Content Choices: 
+        - Tabel Data (Tujuan: Mengorganisir): Tabel HTML dengan Tailwind CSS digunakan untuk menampilkan daftar penduduk, dilengkapi dengan fitur pencarian. Ini adalah cara standar dan efektif untuk menampilkan data tabular.
+        - Form Modal (Tujuan: Interaksi): Form untuk menambah penduduk baru disajikan dalam modal (pop-up) untuk menjaga konteks halaman utama. Ini adalah pola UX yang umum untuk tugas input data.
+        - Grafik Statistik (Tujuan: Menginformasikan): Chart.js tetap digunakan pada halaman dashboard untuk memberikan ringkasan visual data kependudukan.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #4F4A45;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+            color: #6c757d;
+        }
+        .sidebar-link:hover {
+            background-color: #EFEAE6;
+            color: #A0522D;
+        }
+        .sidebar-link.active {
+            background-color: #A0522D;
+            color: #FFFFFF;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-disetujui, .status-aktif { background-color: #d1fae5; color: #065f46; }
+        .status-verifikasi-kaur { background-color: #fef9c3; color: #854d0e; }
+        .status-verifikasi-sekdes { background-color: #e0e7ff; color: #3730a3; }
+        .status-menunggu-kades { background-color: #ffedd5; color: #9a3412; }
+        .status-ditolak, .status-pindah, .status-meninggal { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Halaman Login -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-cover bg-center" style="background-image: url('https://placehold.co/1920x1080/FDFBF8/A0522D?text=Kantor+Desa+Modern');">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-2xl z-10 text-center">
+            <h1 class="text-3xl font-bold text-[#A0522D]">Selamat Datang di SIKeuDes</h1>
+            <p class="text-gray-600">Untuk tujuan demonstrasi, silakan masuk sebagai salah satu peran di bawah ini.</p>
+            <div class="grid grid-cols-1 gap-4 pt-4">
+                <button data-role="operator" class="login-role-btn w-full px-4 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-semibold transition-all shadow-lg hover:shadow-md">
+                    Masuk sebagai Operator
+                </button>
+                <button data-role="kaur" class="login-role-btn w-full px-4 py-3 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700 font-semibold transition-all shadow-lg hover:shadow-md">
+                    Masuk sebagai Kaur/Kasi
+                </button>
+                <button data-role="sekdes" class="login-role-btn w-full px-4 py-3 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-semibold transition-all shadow-lg hover:shadow-md">
+                    Masuk sebagai Sekretaris Desa
+                </button>
+                <button data-role="kades" class="login-role-btn w-full px-4 py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 font-semibold transition-all shadow-lg hover:shadow-md">
+                    Masuk sebagai Kepala Desa
+                </button>
+                <button data-role="admin" class="login-role-btn w-full px-4 py-3 text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 font-semibold transition-all shadow-lg hover:shadow-md">
+                    Masuk sebagai Administrator
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplikasi Utama -->
+    <div id="main-app" class="hidden">
+        <div class="flex h-screen bg-[#FDFBF8]">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-white border-r border-gray-200 p-4 flex flex-col shrink-0">
+                <div class="text-center py-4 border-b border-gray-200">
+                    <h2 class="text-2xl font-bold text-[#A0522D]">SIKeuDes</h2>
+                </div>
+                <div id="user-profile" class="flex items-center gap-4 p-4 mt-4 bg-gray-100 rounded-lg">
+                    <img id="user-avatar" src="https://placehold.co/40x40/EFEAE6/4F4A45?text=OP" alt="Avatar" class="w-10 h-10 rounded-full">
+                    <div>
+                        <p id="user-name" class="font-semibold text-sm text-gray-800">Operator Desa</p>
+                        <p id="user-role" class="text-xs text-gray-500">Online</p>
+                    </div>
+                </div>
+                <nav class="mt-6 flex-1">
+                    <a href="#" data-page="dashboard" class="sidebar-link active"><i class="fas fa-chart-pie w-6 text-center"></i><span class="ml-3">Dashboard</span></a>
+                    <a href="#" data-page="dataManagement" class="sidebar-link mt-2"><i class="fas fa-users w-6 text-center"></i><span class="ml-3">Data Penduduk</span></a>
+                    <a href="#" data-page="letterService" class="sidebar-link mt-2"><i class="fas fa-envelope-open-text w-6 text-center"></i><span class="ml-3">Layanan Surat</span></a>
+                    <a href="#" data-page="userManagement" class="sidebar-link mt-2"><i class="fas fa-user-cog w-6 text-center"></i><span class="ml-3">Manajemen Akun</span></a>
+                </nav>
+                <div class="mt-auto">
+                    <a href="#" id="logout-button" class="sidebar-link text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt w-6 text-center"></i><span class="ml-3">Keluar</span></a>
+                </div>
+            </aside>
+
+            <!-- Konten Utama -->
+            <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+                
+                <h1 id="page-title" class="text-3xl font-bold text-[#6B4F4F] mb-6">Dashboard</h1>
+
+                <!-- Halaman Dashboard -->
+                <section id="dashboard" class="page-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center"><div><p class="text-sm font-medium opacity-80">Total Penduduk</p><p class="text-3xl font-bold">2.440</p></div><i class="fas fa-users text-4xl opacity-50"></i></div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-400 to-green-500 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center"><div><p class="text-sm font-medium opacity-80">Jumlah KK</p><p class="text-3xl font-bold">789</p></div><i class="fas fa-house-user text-4xl opacity-50"></i></div>
+                        </div>
+                        <div class="bg-gradient-to-br from-yellow-400 to-yellow-500 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center"><div><p class="text-sm font-medium opacity-80">Surat Diproses</p><p class="text-3xl font-bold">15</p></div><i class="fas fa-file-signature text-4xl opacity-50"></i></div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-400 to-purple-500 text-white p-6 rounded-xl shadow-lg">
+                            <div class="flex justify-between items-center"><div><p class="text-sm font-medium opacity-80">Pengguna Aktif</p><p class="text-3xl font-bold">6</p></div><i class="fas fa-user-check text-4xl opacity-50"></i></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                        <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200"><h3 class="text-lg font-semibold mb-4">Tren Layanan Surat</h3><div class="chart-container"><canvas id="letterTrendChart"></canvas></div></div>
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200"><h3 class="text-lg font-semibold mb-4">Komposisi Penduduk</h3><div class="chart-container"><canvas id="genderChart"></canvas></div></div>
+                    </div>
+                </section>
+
+                <!-- Halaman Manajemen Data -->
+                <section id="dataManagement" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="data-management-header"></div>
+                        <button id="add-resident-btn" class="flex items-center gap-2 px-4 py-2 text-white bg-[#A0522D] rounded-lg hover:bg-opacity-90 font-semibold shadow-md hover:shadow-lg transition-all"><i class="fas fa-plus"></i> Tambah Penduduk</button>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <div class="mb-4"><input type="text" placeholder="Cari penduduk..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A0522D]"></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Nama Lengkap</th><th class="px-6 py-3">NIK</th><th class="px-6 py-3">Status</th><th class="px-6 py-3 text-center">Aksi</th></tr></thead>
+                                <tbody id="resident-table-body">
+                                    <!-- Data Penduduk Dimuat di Sini -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Halaman Layanan Surat -->
+                <section id="letterService" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div id="letter-service-header"></div>
+                        <button id="create-letter-btn" class="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 font-semibold shadow-md hover:shadow-lg transition-all"><i class="fas fa-pen-to-square"></i> Buat Pengajuan Baru</button>
+                    </div>
+                     <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                        <h3 class="text-xl font-semibold mb-6">Daftar Pengajuan Surat</h3>
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Pemohon</th><th class="px-6 py-3">Jenis Surat</th><th class="px-6 py-3">Tanggal</th><th class="px-6 py-3">Status</th><th class="px-6 py-3 text-center">Aksi</th></tr></thead>
+                            <tbody id="letter-table-body"></tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <!-- Halaman Manajemen Akun (Admin) -->
+                <section id="userManagement" class="page-content hidden">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                         <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Nama Pengguna</th><th class="px-6 py-3">Username</th><th class="px-6 py-3">Peran</th><th class="px-6 py-3 text-center">Aksi</th></tr></thead>
+                            <tbody>
+                                <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">Administrator</td><td class="px-6 py-4">admin</td><td class="px-6 py-4">Admin Sistem</td><td class="px-6 py-4 text-center"><button class="text-[#A0522D] hover:underline">Edit</button></td></tr>
+                                <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">Bapak Kepala Desa</td><td class="px-6 py-4">kades</td><td class="px-6 py-4">Kepala Desa</td><td class="px-6 py-4 text-center"><button class="text-[#A0522D] hover:underline">Edit</button></td></tr>
+                                <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">Ibu Sekretaris Desa</td><td class="px-6 py-4">sekdes</td><td class="px-6 py-4">Sekretaris Desa</td><td class="px-6 py-4 text-center"><button class="text-[#A0522D] hover:underline">Edit</button></td></tr>
+                                <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">Staf Kaur</td><td class="px-6 py-4">kaur</td><td class="px-6 py-4">Kaur/Kasi</td><td class="px-6 py-4 text-center"><button class="text-[#A0522D] hover:underline">Edit</button></td></tr>
+                                <tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">Staf Operator</td><td class="px-6 py-4">operator</td><td class="px-6 py-4">Operator</td><td class="px-6 py-4 text-center"><button class="text-[#A0522D] hover:underline">Edit</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="add-resident-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-8 transform transition-all scale-95 opacity-0" id="modal-content-resident">
+            <div class="flex justify-between items-center mb-6"><h3 id="resident-modal-title" class="text-xl font-semibold text-gray-800">Form Pendaftaran Penduduk Baru</h3><button class="close-modal-btn text-gray-400 hover:text-gray-800 text-2xl">&times;</button></div>
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="text-sm font-medium">NIK</label><input type="text" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div><div><label class="text-sm font-medium">No. Kartu Keluarga</label><input type="text" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div></div>
+                <div><label class="text-sm font-medium">Nama Lengkap</label><input type="text" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="text-sm font-medium">Tempat Lahir</label><input type="text" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div><div><label class="text-sm font-medium">Tanggal Lahir</label><input type="date" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div></div>
+                <div><label class="text-sm font-medium">Alamat</label><textarea class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></textarea></div>
+                <div class="pt-4 flex justify-end gap-3"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold">Batal</button><button type="submit" class="px-4 py-2 text-white bg-[#A0522D] rounded-lg hover:bg-opacity-90 font-semibold">Simpan Data</button></div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="process-letter-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 transform transition-all scale-95 opacity-0" id="modal-content-letter">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-semibold text-gray-800">Proses Persetujuan Surat</h3><button class="close-modal-btn text-gray-400 hover:text-gray-800 text-2xl">&times;</button></div>
+            <div>
+                <p class="mb-2"><span class="font-semibold">Pemohon:</span> <span id="letter-applicant"></span></p>
+                <p class="mb-4"><span class="font-semibold">Jenis Surat:</span> <span id="letter-type"></span></p>
+                <div class="mb-4"><label class="text-sm font-medium">Catatan (Opsional)</label><textarea rows="3" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></textarea></div>
+                <div id="approval-actions" class="pt-4 flex justify-end gap-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detail-resident-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-lg w-full max-w-lg p-8 transform transition-all scale-95 opacity-0" id="modal-content-detail">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-semibold text-gray-800">Detail Data Penduduk</h3><button class="close-modal-btn text-gray-400 hover:text-gray-800 text-2xl">&times;</button></div>
+            <div id="detail-resident-content" class="space-y-3 text-sm"></div>
+        </div>
+    </div>
+
+    <div id="mutation-resident-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl shadow-lg w-full max-w-md p-8 transform transition-all scale-95 opacity-0" id="modal-content-mutation">
+            <div class="flex justify-between items-center mb-6"><h3 class="text-xl font-semibold text-gray-800">Proses Mutasi Penduduk</h3><button class="close-modal-btn text-gray-400 hover:text-gray-800 text-2xl">&times;</button></div>
+            <form class="space-y-4">
+                <p><span class="font-semibold">Nama:</span> <span id="mutation-resident-name"></span></p>
+                <div>
+                    <label class="text-sm font-medium">Jenis Mutasi</label>
+                    <select class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"><option>Pindah Keluar</option><option>Meninggal Dunia</option></select>
+                </div>
+                <div><label class="text-sm font-medium">Tanggal Kejadian</label><input type="date" class="w-full px-3 py-2 mt-1 bg-gray-50 border border-gray-300 rounded-lg"></div>
+                <div class="pt-4 flex justify-end gap-3"><button type="button" class="cancel-modal-btn px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-semibold">Batal</button><button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 font-semibold">Proses Mutasi</button></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // All element selectors
+            const loginScreen = document.getElementById('login-screen');
+            const mainApp = document.getElementById('main-app');
+            const logoutButton = document.getElementById('logout-button');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const pages = document.querySelectorAll('.page-content');
+            const pageTitle = document.getElementById('page-title');
+            
+            // Modals
+            const addResidentModal = document.getElementById('add-resident-modal');
+            const processLetterModal = document.getElementById('process-letter-modal');
+            const detailResidentModal = document.getElementById('detail-resident-modal');
+            const mutationResidentModal = document.getElementById('mutation-resident-modal');
+
+            // Modal Contents
+            const modalContentResident = document.getElementById('modal-content-resident');
+            const modalContentLetter = document.getElementById('modal-content-letter');
+            const modalContentDetail = document.getElementById('modal-content-detail');
+            const modalContentMutation = document.getElementById('modal-content-mutation');
+
+            // Data
+            const userRoles = {
+                operator: { name: 'Staf Operator', role: 'Operator', avatar: 'OP', permissions: ['dashboard', 'dataManagement', 'letterService'] },
+                kaur: { name: 'Staf Kaur', role: 'Kaur/Kasi', avatar: 'KR', permissions: ['dashboard', 'letterService'] },
+                sekdes: { name: 'Ibu Sekdes', role: 'Sekretaris Desa', avatar: 'SD', permissions: ['dashboard', 'letterService'] },
+                kades: { name: 'Bapak Kades', role: 'Kepala Desa', avatar: 'KD', permissions: ['dashboard', 'letterService'] },
+                admin: { name: 'Administrator', role: 'Admin Sistem', avatar: 'AD', permissions: ['dashboard', 'dataManagement', 'letterService', 'userManagement'] }
+            };
+
+            const allLetters = [
+                { id: 1, applicant: 'Ahmad Subarjo', type: 'Pengantar SKCK', date: '24/08/2025', status: 'disetujui', statusText: 'Disetujui Kades' },
+                { id: 2, applicant: 'Dewi Lestari', type: 'Keterangan Usaha', date: '23/08/2025', status: 'menunggu-kades', statusText: 'Menunggu Kades' },
+                { id: 3, applicant: 'Joko Widodo', type: 'Keterangan Domisili', date: '22/08/2025', status: 'verifikasi-sekdes', statusText: 'Verifikasi Sekdes' },
+                { id: 4, applicant: 'Putri Amelia', type: 'Keterangan Tidak Mampu', date: '21/08/2025', status: 'verifikasi-kaur', statusText: 'Verifikasi Kaur' },
+                { id: 5, applicant: 'Bambang Pamungkas', type: 'Keterangan Domisili', date: '20/08/2025', status: 'ditolak', statusText: 'Ditolak' }
+            ];
+
+            const allResidents = [
+                { id: 1, name: 'Budi Santoso', nik: '3201...0001', kk: '3201...0011', address: 'Jl. Desa Makmur No. 1', status: 'aktif', avatar: 'BS' },
+                { id: 2, name: 'Siti Aminah', nik: '3201...0002', kk: '3201...0012', address: 'Jl. Desa Sejahtera No. 5', status: 'aktif', avatar: 'SA' },
+                { id: 3, name: 'Agus Setiawan', nik: '3201...0003', kk: '3201...0013', address: 'Jl. Pembangunan No. 10', status: 'pindah', avatar: 'AS' },
+                { id: 4, name: 'Rina Marlina', nik: '3201...0004', kk: '3201...0014', address: 'Gg. Maju Jaya No. 2', status: 'meninggal', avatar: 'RM' }
+            ];
+
+            let currentUserRole = null;
+
+            // Functions
+            function openModal(modal, content) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeModal(modal, content) {
+                content.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+            
+            function setupUIForRole(role) {
+                document.getElementById('user-name').textContent = role.name;
+                document.getElementById('user-role').textContent = role.role;
+                document.getElementById('user-avatar').src = `https://placehold.co/40x40/EFEAE6/4F4A45?text=${role.avatar}`;
+                sidebarLinks.forEach(link => {
+                    const page = link.dataset.page;
+                    if (page && role.permissions.includes(page)) {
+                        link.style.display = 'flex';
+                    } else if(page) {
+                        link.style.display = 'none';
+                    }
+                });
+                document.querySelector('.sidebar-link[data-page="dashboard"]').click();
+            }
+
+            function updatePageContentForRole(page) {
+                if (page === 'letterService') {
+                    const letterTableBody = document.getElementById('letter-table-body');
+                    const createLetterBtn = document.getElementById('create-letter-btn');
+                    letterTableBody.innerHTML = '';
+                    
+                    let filteredLetters = allLetters;
+                    if (currentUserRole.role === 'Kaur/Kasi') filteredLetters = allLetters.filter(l => l.status === 'verifikasi-kaur');
+                    else if (currentUserRole.role === 'Sekretaris Desa') filteredLetters = allLetters.filter(l => l.status === 'verifikasi-sekdes');
+                    else if (currentUserRole.role === 'Kepala Desa') filteredLetters = allLetters.filter(l => l.status === 'menunggu-kades');
+                    
+                    createLetterBtn.style.display = currentUserRole.role === 'Operator' ? 'flex' : 'none';
+
+                    filteredLetters.forEach(letter => {
+                        const row = `<tr class="bg-white border-b hover:bg-gray-50"><td class="px-6 py-4 font-medium">${letter.applicant}</td><td class="px-6 py-4">${letter.type}</td><td class="px-6 py-4">${letter.date}</td><td class="px-6 py-4"><span class="status-badge status-${letter.status}">${letter.statusText}</span></td><td class="px-6 py-4 text-center"><button class="${letter.status === 'disetujui' || letter.status === 'ditolak' ? 'text-gray-500' : 'text-[#A0522D]'} hover:underline process-letter-btn" data-status="${letter.status}">${letter.status === 'disetujui' ? 'Lihat' : 'Proses'}</button></td></tr>`;
+                        letterTableBody.innerHTML += row;
+                    });
+                    addProcessButtonListeners();
+                } else if (page === 'dataManagement') {
+                    const residentTableBody = document.getElementById('resident-table-body');
+                    residentTableBody.innerHTML = '';
+                    allResidents.forEach(res => {
+                        const row = `
+                            <tr class="bg-white border-b hover:bg-gray-50" data-id="${res.id}">
+                                <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-3"><img src="https://placehold.co/32x32/6096B4/FFFFFF?text=${res.avatar}" class="w-8 h-8 rounded-full">${res.name}</td>
+                                <td class="px-6 py-4">${res.nik}</td>
+                                <td class="px-6 py-4"><span class="status-badge status-${res.status}">${res.status}</span></td>
+                                <td class="px-6 py-4 text-center space-x-2">
+                                    <button title="Detail" class="text-blue-600 hover:text-blue-800 action-btn" data-action="detail"><i class="fas fa-eye"></i></button>
+                                    <button title="Ubah" class="text-green-600 hover:text-green-800 action-btn" data-action="edit"><i class="fas fa-edit"></i></button>
+                                    <button title="Mutasi" class="text-red-600 hover:text-red-800 action-btn" data-action="mutate"><i class="fas fa-exchange-alt"></i></button>
+                                </td>
+                            </tr>`;
+                        residentTableBody.innerHTML += row;
+                    });
+                    addResidentActionListeners();
+                }
+            }
+
+            function addResidentActionListeners() {
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        const action = e.currentTarget.dataset.action;
+                        const residentId = e.currentTarget.closest('tr').dataset.id;
+                        const residentData = allResidents.find(r => r.id == residentId);
+                        
+                        if (action === 'detail') {
+                            document.getElementById('detail-resident-content').innerHTML = `
+                                <p><strong>Nama:</strong> ${residentData.name}</p>
+                                <p><strong>NIK:</strong> ${residentData.nik}</p>
+                                <p><strong>No. KK:</strong> ${residentData.kk}</p>
+                                <p><strong>Alamat:</strong> ${residentData.address}</p>
+                                <p><strong>Status:</strong> <span class="status-badge status-${residentData.status}">${residentData.status}</span></p>
+                            `;
+                            openModal(detailResidentModal, modalContentDetail);
+                        } else if (action === 'edit') {
+                            document.getElementById('resident-modal-title').textContent = 'Ubah Data Penduduk';
+                            // Logic to pre-fill form would go here
+                            openModal(addResidentModal, modalContentResident);
+                        } else if (action === 'mutate') {
+                            document.getElementById('mutation-resident-name').textContent = residentData.name;
+                            openModal(mutationResidentModal, modalContentMutation);
+                        }
+                    });
+                });
+            }
+
+            function addProcessButtonListeners() {
+                document.querySelectorAll('.process-letter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const row = e.target.closest('tr');
+                        const applicant = row.cells[0].textContent;
+                        const type = row.cells[1].textContent;
+                        const status = e.target.dataset.status;
+
+                        document.getElementById('letter-applicant').textContent = applicant;
+                        document.getElementById('letter-type').textContent = type;
+                        
+                        const actionsContainer = document.getElementById('approval-actions');
+                        actionsContainer.innerHTML = '';
+
+                        let canApprove = false;
+                        if (currentUserRole.role === 'Kaur/Kasi' && status === 'verifikasi-kaur') canApprove = true;
+                        if (currentUserRole.role === 'Sekretaris Desa' && status === 'verifikasi-sekdes') canApprove = true;
+                        if (currentUserRole.role === 'Kepala Desa' && status === 'menunggu-kades') canApprove = true;
+                        
+                        if (canApprove) {
+                            actionsContainer.innerHTML += `<button class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold">Tolak</button>`;
+                            actionsContainer.innerHTML += `<button class="px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 font-semibold">Setujui & Teruskan</button>`;
+                        } else {
+                            actionsContainer.innerHTML = `<p class="text-sm text-gray-500">Tindakan tidak tersedia atau Anda tidak memiliki hak akses untuk status ini.</p>`;
+                        }
+                        
+                        openModal(processLetterModal, modalContentLetter);
+                    });
+                });
+            }
+
+            // Event Listeners
+            document.querySelectorAll('.login-role-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const roleKey = btn.dataset.role;
+                    currentUserRole = userRoles[roleKey];
+                    setupUIForRole(currentUserRole);
+                    loginScreen.classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    initializeCharts();
+                });
+            });
+
+            logoutButton.addEventListener('click', () => {
+                mainApp.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+            });
+
+            sidebarLinks.forEach(link => {
+                if(!link.id) {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        sidebarLinks.forEach(item => item.classList.remove('active'));
+                        link.classList.add('active');
+                        const targetPage = link.getAttribute('data-page');
+                        pageTitle.textContent = link.textContent.trim();
+                        pages.forEach(page => page.id === targetPage ? page.classList.remove('hidden') : page.classList.add('hidden'));
+                        updatePageContentForRole(targetPage);
+                    });
+                }
+            });
+            
+            document.getElementById('add-resident-btn').addEventListener('click', () => {
+                document.getElementById('resident-modal-title').textContent = 'Form Pendaftaran Penduduk Baru';
+                openModal(addResidentModal, modalContentResident);
+            });
+
+            document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modal = e.target.closest('.fixed');
+                    const content = modal.querySelector('.transform');
+                    closeModal(modal, content);
+                });
+            });
+            document.querySelectorAll('.cancel-modal-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modal = e.target.closest('.fixed');
+                    const content = modal.querySelector('.transform');
+                    closeModal(modal, content);
+                });
+            });
+
+            // Chart Initialization
+            let chartsInitialized = false;
+            function initializeCharts() {
+                if (chartsInitialized) return;
+                chartsInitialized = true;
+                const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter' } } } } };
+                new Chart(document.getElementById('genderChart').getContext('2d'), { type: 'doughnut', data: { labels: ['Laki-laki', 'Perempuan'], datasets: [{ data: [1250, 1190], backgroundColor: ['#3b82f6', '#ec4899'], borderColor: '#FFFFFF', borderWidth: 4 }] }, options: chartOptions });
+                new Chart(document.getElementById('letterTrendChart').getContext('2d'), { type: 'bar', data: { labels: ['Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu'], datasets: [{ label: 'Surat Diterbitkan', data: [45, 52, 60, 55, 75, 82], backgroundColor: '#A0522D', borderRadius: 6 }] }, options: { ...chartOptions, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } } });
+            }
+        });
+    </script>
+</body>
+</html>

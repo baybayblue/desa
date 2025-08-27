@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Aplikasi SIAPDes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: #1d4ed8;
+            color: white;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .report-chart-container {
+            position: relative;
+            height: 250px;
+            width: 250px;
+            margin: auto;
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease;
+        }
+        .modal-content {
+            transition: all 0.3s ease;
+        }
+        .toast {
+            transition: all 0.5s ease;
+        }
+        .employee-card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .employee-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2563eb;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2563eb;
+        }
+        .editable-textarea {
+            background-color: transparent;
+            resize: none;
+        }
+        .editable-textarea:read-only {
+            border-color: transparent;
+            padding-left: 0;
+            padding-right: 0;
+            cursor: default;
+        }
+        .editable-textarea.editing {
+            background-color: #eff6ff;
+            border-color: #93c5fd;
+        }
+        .editable-textarea:focus {
+             background-color: #dbeafe;
+        }
+        .task-card {
+            cursor: grab;
+        }
+        .task-card:active {
+            cursor: grabbing;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div id="app">
+        <!-- LOGIN SCREEN -->
+        <div id="login-screen" class="flex items-center justify-center min-h-screen bg-slate-100">
+            <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold text-slate-800">Sistem Informasi Desa</h1>
+                    <p class="text-slate-500 mt-2">Satu aplikasi untuk semua kebutuhan desa.</p>
+                </div>
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="text-sm font-medium text-slate-700">Alamat Email</label>
+                        <input type="email" id="email" name="email" placeholder="contoh@desa.id" required class="form-input mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none transition">
+                        <p class="text-xs text-slate-400 mt-2">Gunakan: pegawai@desa.id, admin@desa.id, atau kades@desa.id untuk simulasi.</p>
+                    </div>
+                    <div>
+                        <label for="password" class="text-sm font-medium text-slate-700">Password</label>
+                        <input type="password" id="password" name="password" value="123456" required class="form-input mt-1 block w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none transition">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full btn-primary text-white bg-blue-600 font-semibold py-3 px-4 rounded-lg transition">Masuk</button>
+                    </div>
+                </form>
+                <p id="login-error" class="text-sm text-center text-red-500 hidden">Email atau password salah.</p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD SCREEN -->
+        <div id="dashboard-screen" class="hidden">
+            <div class="relative min-h-screen md:flex">
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex justify-between items-center bg-white p-4 shadow-md no-print">
+                    <span class="text-2xl font-bold text-slate-800">SI-Desa</span>
+                    <button id="mobile-menu-button" class="text-slate-500 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                    </button>
+                </div>
+
+                <!-- Sidebar -->
+                <aside id="sidebar" class="bg-blue-800 text-blue-100 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-20 shadow-lg no-print">
+                    <a href="#" class="text-white text-2xl font-bold px-4 flex items-center gap-2">
+                         <svg class="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205l3 1m-3-1l-1.5-.545M7.5 3l3.75 1.364M1.5 15l4.5-1.636m13.5 3.272l-1.5-.545M6 18l-3-1" /></svg>
+                        <span>SI-Desa</span>
+                    </a>
+                    <nav id="sidebar-nav" class="mt-10">
+                    </nav>
+                    <div class="absolute bottom-0 left-0 w-full p-4 border-t border-blue-700">
+                        <div class="flex items-center gap-4">
+                             <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white" id="user-initial"></div>
+                            <div>
+                                <p id="user-name" class="font-semibold text-white"></p>
+                                <p id="user-role" class="text-sm text-blue-300"></p>
+                            </div>
+                        </div>
+                         <button id="logout-btn" class="w-full mt-4 flex items-center justify-center gap-2 text-sm py-2 px-4 rounded-lg bg-blue-700 hover:bg-red-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Main content -->
+                <main class="flex-1 bg-slate-100">
+                    <div id="dashboard-content" class="p-4 sm:p-6 lg:p-8">
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="employee-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-lg z-40 transform scale-95">
+            <form id="employee-form" class="p-6">
+                <h3 id="modal-title" class="text-xl font-bold text-slate-800 mb-4"></h3>
+                <input type="hidden" id="employee-id">
+                <div class="space-y-4">
+                    <div><label for="nama" class="text-sm font-medium">Nama Lengkap</label><input type="text" id="nama" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="nip" class="text-sm font-medium">NIP</label><input type="text" id="nip" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="jabatan" class="text-sm font-medium">Jabatan</label><input type="text" id="jabatan" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="email-pegawai" class="text-sm font-medium">Email</label><input type="email" id="email-pegawai" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="population-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-2xl z-40 transform scale-95">
+            <form id="population-form" class="p-6">
+                <h3 id="population-modal-title" class="text-xl font-bold text-slate-800 mb-4"></h3>
+                <input type="hidden" id="population-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="pop-nik" class="text-sm font-medium">NIK</label><input type="text" id="pop-nik" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="pop-nama" class="text-sm font-medium">Nama Lengkap</label><input type="text" id="pop-nama" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="pop-ttl" class="text-sm font-medium">Tanggal Lahir</label><input type="date" id="pop-ttl" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="pop-gender" class="text-sm font-medium">Jenis Kelamin</label><select id="pop-gender" required class="form-input mt-1 w-full p-2 border rounded bg-white"><option>Laki-laki</option><option>Perempuan</option></select></div>
+                    <div class="md:col-span-2"><label for="pop-address" class="text-sm font-medium">Alamat</label><textarea id="pop-address" rows="2" required class="form-input mt-1 w-full p-2 border rounded"></textarea></div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="leave-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-lg z-40 transform scale-95">
+            <form id="leave-form" class="p-6">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">Formulir Pengajuan Izin/Cuti</h3>
+                <div class="space-y-4">
+                    <div><label for="leave-type" class="text-sm font-medium">Jenis Pengajuan</label><select id="leave-type" required class="form-input mt-1 w-full p-2 border rounded bg-white"><option>Sakit</option><option>Izin</option><option>Cuti Tahunan</option></select></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label for="leave-start-date" class="text-sm font-medium">Tanggal Mulai</label><input type="date" id="leave-start-date" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                        <div><label for="leave-end-date" class="text-sm font-medium">Tanggal Selesai</label><input type="date" id="leave-end-date" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    </div>
+                    <div><label for="leave-reason" class="text-sm font-medium">Keterangan</label><textarea id="leave-reason" rows="3" required class="form-input mt-1 w-full p-2 border rounded"></textarea></div>
+                    <div><label for="leave-document" class="text-sm font-medium">Dokumen Pendukung (opsional)</label><input type="file" id="leave-document" class="mt-1 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"></div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Kirim Pengajuan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="assignment-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-lg z-40 transform scale-95">
+            <form id="assignment-form" class="p-6">
+                <h3 class="text-xl font-bold text-slate-800 mb-4">Tambah Tugas Baru</h3>
+                <div class="space-y-4">
+                    <div><label for="assignment-title" class="text-sm font-medium">Judul Tugas</label><input type="text" id="assignment-title" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="assignment-assignee" class="text-sm font-medium">Ditugaskan Kepada</label><select id="assignment-assignee" required class="form-input mt-1 w-full p-2 border rounded bg-white"></select></div>
+                    <div><label for="assignment-due-date" class="text-sm font-medium">Tanggal Selesai</label><input type="date" id="assignment-due-date" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                    <div><label for="assignment-priority" class="text-sm font-medium">Prioritas</label><select id="assignment-priority" required class="form-input mt-1 w-full p-2 border rounded bg-white"><option>Rendah</option><option>Sedang</option><option>Tinggi</option></select></div>
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan Tugas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="letter-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-4xl z-40 transform scale-95 flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-800">Buat Surat Baru</h3>
+                <button class="modal-cancel-btn text-slate-500 hover:text-slate-800">&times;</button>
+            </div>
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 p-6 overflow-y-auto">
+                <form id="letter-form">
+                    <div class="space-y-4">
+                        <div><label for="letter-type" class="text-sm font-medium">Jenis Surat</label><select id="letter-type" required class="form-input mt-1 w-full p-2 border rounded bg-white"><option value="skm">Surat Keterangan Miskin</option><option value="sku">Surat Keterangan Usaha</option><option value="skd">Surat Keterangan Domisili</option></select></div>
+                        <div><label for="letter-resident" class="text-sm font-medium">Nama Pemohon (Warga)</label><select id="letter-resident" required class="form-input mt-1 w-full p-2 border rounded bg-white"></select></div>
+                        <div id="letter-extra-fields"></div>
+                        <div><label for="letter-signer" class="text-sm font-medium">Pejabat Penandatangan</label><select id="letter-signer" required class="form-input mt-1 w-full p-2 border rounded bg-white"></select></div>
+                    </div>
+                </form>
+                <div class="bg-slate-50 p-4 rounded-lg border">
+                    <h4 class="font-semibold text-center mb-4">Pratinjau Surat</h4>
+                    <div id="letter-preview" class="text-xs leading-relaxed bg-white p-4 shadow-inner min-h-[400px]">Pilih jenis surat untuk melihat pratinjau.</div>
+                </div>
+            </div>
+            <div class="p-4 border-t flex justify-end gap-3">
+                <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                <button id="save-letter-btn" type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan & Cetak</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-sm z-40 p-6 text-center transform scale-95">
+            <h3 class="text-lg font-bold">Hapus Data?</h3>
+            <p id="delete-message" class="text-sm text-slate-500 mt-2"></p>
+            <div class="mt-6 flex justify-center gap-3">
+                <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">Batal</button>
+                <button id="confirm-delete-btn" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Hapus</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="account-generated-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
+        <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-md z-40 p-6 text-center transform scale-95">
+            <div class="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="h-8 w-8 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <h3 class="text-xl font-bold mt-4">Akun Berhasil Dibuat!</h3>
+            <p class="text-sm text-slate-500 mt-2">Berikut adalah detail login untuk pegawai baru. Harap simpan informasi ini.</p>
+            <div class="text-left mt-4 bg-slate-50 p-4 rounded-lg space-y-2">
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">EMAIL</label>
+                    <p id="generated-email" class="font-mono"></p>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-slate-500">PASSWORD SEMENTARA</label>
+                    <div class="flex items-center gap-2">
+                        <p id="generated-password" class="font-mono flex-grow"></p>
+                        <button id="copy-password-btn" class="p-1 text-slate-500 hover:text-blue-600" title="Salin Password">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" /><path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h6a2 2 0 00-2-2H5z" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6">
+                <button type="button" class="modal-cancel-btn w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-lg transform translate-x-[120%] toast">
+        <p id="toast-message"></p>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginScreen = document.getElementById('login-screen');
+            const dashboardScreen = document.getElementById('dashboard-screen');
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            const logoutBtn = document.getElementById('logout-btn');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const userNameEl = document.getElementById('user-name');
+            const userRoleEl = document.getElementById('user-role');
+            const userInitialEl = document.getElementById('user-initial');
+            const sidebarNav = document.getElementById('sidebar-nav');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const sidebar = document.getElementById('sidebar');
+            
+            const employeeModal = document.getElementById('employee-modal');
+            const deleteModal = document.getElementById('delete-modal');
+            const accountGeneratedModal = document.getElementById('account-generated-modal');
+            const leaveModal = document.getElementById('leave-modal');
+            const assignmentModal = document.getElementById('assignment-modal');
+            const populationModal = document.getElementById('population-modal');
+            const letterModal = document.getElementById('letter-modal');
+            const employeeForm = document.getElementById('employee-form');
+            const leaveForm = document.getElementById('leave-form');
+            const assignmentForm = document.getElementById('assignment-form');
+            const populationForm = document.getElementById('population-form');
+            const letterForm = document.getElementById('letter-form');
+            const modalTitle = document.getElementById('modal-title');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const copyPasswordBtn = document.getElementById('copy-password-btn');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            let attendanceChart = null;
+            let reportChart = null;
+            let populationChart = null;
+            let currentView = 'dashboard';
+            let itemToDelete = { id: null, type: null };
+
+            let employeesData = [
+                { id: 1, nama: 'Budi Santoso', nip: '198503152010011001', jabatan: 'Sekretaris Desa', email: 'budi.s@desa.id' },
+                { id: 2, nama: 'Siti Aminah', nip: '199007202014022003', jabatan: 'Kaur Keuangan', email: 'siti.a@desa.id' },
+                { id: 3, nama: 'Eko Prasetyo', nip: '198811052015031002', jabatan: 'Kasi Pemerintahan', email: 'eko.p@desa.id' },
+                { id: 4, nama: 'Dewi Lestari', nip: '199201102018032001', jabatan: 'Staf Pelayanan', email: 'dewi.l@desa.id' },
+                { id: 5, nama: 'Agus Setiawan', nip: '198708172012011005', jabatan: 'Kasi Kesejahteraan', email: 'agus.s@desa.id' }
+            ];
+
+            let populationData = [
+                { id: 1, nik: '3204012345670001', nama: 'Asep Sunandar', ttl: '1980-05-15', gender: 'Laki-laki', address: 'Kp. Ciharum RT 01/RW 02' },
+                { id: 2, nik: '3204016543210002', nama: 'Mimin Mintarsih', ttl: '1982-11-20', gender: 'Perempuan', address: 'Kp. Ciharum RT 01/RW 02' },
+                { id: 3, nik: '3204011010100003', nama: 'Ujang Kastaman', ttl: '1975-01-30', gender: 'Laki-laki', address: 'Kp. Bojong Koneng RT 03/RW 01' },
+            ];
+
+            let leaveRequestsData = [
+                { id: 1, type: 'Sakit', startDate: '2025-08-19', endDate: '2025-08-19', reason: 'Demam dan flu', status: 'Disetujui', employee: 'Budi Santoso' },
+                { id: 2, type: 'Cuti Tahunan', startDate: '2025-07-10', endDate: '2025-07-12', reason: 'Keperluan keluarga di luar kota', status: 'Disetujui', employee: 'Siti Aminah' },
+                { id: 3, type: 'Izin', startDate: '2025-06-05', endDate: '2025-06-05', reason: 'Mengurus surat-surat di kantor Samsat', status: 'Ditolak', employee: 'Eko Prasetyo' },
+                { id: 4, type: 'Sakit', startDate: '2025-08-22', endDate: '2025-08-23', reason: 'Perlu istirahat, surat dokter terlampir.', status: 'Menunggu', employee: 'Dewi Lestari' },
+                { id: 5, type: 'Izin', startDate: '2025-08-25', endDate: '2025-08-25', reason: 'Acara keluarga mendadak.', status: 'Menunggu', employee: 'Agus Setiawan' },
+            ];
+            
+            let assignmentsData = [
+                { id: 1, title: 'Siapkan laporan bulanan', assignee: 'Siti Aminah', dueDate: '2025-08-30', priority: 'Tinggi', status: 'Dikerjakan' },
+                { id: 2, title: 'Rapat koordinasi RT/RW', assignee: 'Eko Prasetyo', dueDate: '2025-09-05', priority: 'Sedang', status: 'Baru' },
+                { id: 3, title: 'Arsipkan surat masuk minggu ini', assignee: 'Dewi Lestari', dueDate: '2025-08-29', priority: 'Rendah', status: 'Baru' },
+                { id: 4, title: 'Selesaikan rekapitulasi PBB', assignee: 'Siti Aminah', dueDate: '2025-08-28', priority: 'Tinggi', status: 'Selesai' },
+            ];
+
+            let lettersData = [
+                { id: 1, no: '470/01/VIII/2025', date: '2025-08-22', type: 'Surat Keterangan Miskin', applicant: 'Asep Sunandar', status: 'Selesai' },
+                { id: 2, no: '510/02/VIII/2025', date: '2025-08-23', type: 'Surat Keterangan Usaha', applicant: 'Mimin Mintarsih', status: 'Diproses' },
+                { id: 3, no: '474/03/VIII/2025', date: '2025-08-24', type: 'Surat Keterangan Domisili', applicant: 'Ujang Kastaman', status: 'Menunggu Verifikasi' },
+            ];
+
+            const users = {
+                'pegawai@desa.id': { name: 'Budi Santoso', role: 'Pegawai Desa', view: 'pegawai' },
+                'admin@desa.id': { name: 'Admin Desa', role: 'Admin', view: 'admin' },
+                'kades@desa.id': { name: 'Ahmad Subarjo', role: 'Kepala Desa', view: 'kades' }
+            };
+
+            const navLinks = {
+                pegawai: `<a href="#" data-view="dashboard" class="sidebar-link active flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg><span>Utama</span></a><a href="#" data-view="history" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><span>Riwayat Absensi</span></a><a href="#" data-view="leave" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span>Ajukan Izin/Cuti</span></a>`,
+                admin: `
+                    <a href="#" data-view="dashboard" class="sidebar-link active flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg><span>Dashboard</span></a>
+                    <div class="px-4 pt-4 pb-2 text-xs font-semibold text-blue-400 uppercase">Data Master</div>
+                    <a href="#" data-view="village-profile" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5.5M11 14L9 12l-2 2" /></svg><span>Profil Desa</span></a>
+                    <a href="#" data-view="employees" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg><span>Data Pegawai</span></a>
+                    <a href="#" data-view="assignments" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg><span>Penugasan</span></a>
+                    <a href="#" data-view="population" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" /></svg><span>Data Penduduk</span></a>
+                    <div class="px-4 pt-4 pb-2 text-xs font-semibold text-blue-400 uppercase">Administrasi</div>
+                    <a href="#" data-view="reports" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span>Laporan Kehadiran</span></a>
+                    <a href="#" data-view="letters" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg><span>Surat Keluar</span></a>
+                    <div class="px-4 pt-4 pb-2 text-xs font-semibold text-blue-400 uppercase">Sistem</div>
+                    <a href="#" data-view="settings" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span>Pengaturan</span></a>
+                `,
+                kades: `<a href="#" data-view="dashboard" class="sidebar-link active flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg><span>Dashboard</span></a><a href="#" data-view="approval" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span>Persetujuan Izin</span></a><a href="#" data-view="reports" class="sidebar-link flex items-center space-x-3 py-2.5 px-4 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span>Laporan</span></a>`
+            };
+
+            function switchView(view) {
+                currentView = view;
+                document.querySelectorAll('.sidebar-link').forEach(link => {
+                    link.classList.toggle('active', link.dataset.view === view);
+                });
+                if (view === 'dashboard') renderDashboard(users[loginForm.email.value].view);
+                else if (view === 'employees') renderEmployeeManagement();
+                else if (view === 'reports') renderReportsPage();
+                else if (view === 'settings') renderSettingsPage();
+                else if (view === 'generate-account') renderGenerateAccountPage();
+                else if (view === 'history') renderHistoryPage();
+                else if (view === 'leave') renderLeavePage();
+                else if (view === 'approval') renderApprovalPage();
+                else if (view === 'village-profile') renderVillageProfilePage();
+                else if (view === 'assignments') renderAssignmentPage();
+                else if (view === 'population') renderPopulationPage();
+                else if (view === 'letters') renderLettersPage();
+                else if (view === 'placeholder') renderPlaceholderPage();
+            }
+
+            sidebarNav.addEventListener('click', (e) => {
+                const link = e.target.closest('.sidebar-link');
+                if (link && link.dataset.view) {
+                    e.preventDefault();
+                    switchView(link.dataset.view);
+                }
+            });
+            
+            mobileMenuButton.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                loginError.classList.add('hidden');
+                const email = e.target.email.value;
+                const user = users[email];
+
+                if (user) {
+                    loginScreen.classList.add('hidden');
+                    dashboardScreen.classList.remove('hidden');
+                    userNameEl.textContent = user.name;
+                    userRoleEl.textContent = user.role;
+                    userInitialEl.textContent = user.name.charAt(0);
+                    sidebarNav.innerHTML = navLinks[user.view];
+                    switchView('dashboard');
+                } else {
+                    loginError.classList.remove('hidden');
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                dashboardScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+                loginForm.reset();
+            });
+
+            function renderDashboard(view) {
+                if (attendanceChart) attendanceChart.destroy();
+                let content = '';
+                const currentHour = new Date().getHours();
+                let greeting = 'Selamat Datang';
+                if (currentHour < 11) greeting = 'Selamat Pagi';
+                else if (currentHour < 15) greeting = 'Selamat Siang';
+                else if (currentHour < 19) greeting = 'Selamat Sore';
+                else greeting = 'Selamat Malam';
+                
+                const header = `<div class="mb-6"><h2 class="text-3xl font-bold text-slate-800">${greeting}, ${userNameEl.textContent.split(' ')[0]}!</h2><p class="text-slate-500">Berikut adalah ringkasan aktivitas hari ini.</p></div>`;
+
+                if (view === 'pegawai') {
+                    content = `${header}
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 card bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-8 rounded-xl flex flex-col justify-between shadow-lg">
+                            <div>
+                                <p class="font-semibold" id="current-date"></p>
+                                <p class="text-5xl font-bold mt-2" id="current-time"></p>
+                            </div>
+                            <button class="mt-8 w-full bg-white text-blue-600 font-bold py-4 px-8 rounded-lg text-lg hover:bg-blue-100 transition-colors transform hover:scale-105 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                <span>SCAN ABSEN SEKARANG</span>
+                            </button>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="card bg-white p-6 rounded-xl shadow">
+                                <h4 class="font-semibold text-slate-800">Status Hari Ini</h4>
+                                <p class="text-sm text-slate-500 mt-2">Masuk: <span class="font-bold text-green-600">07:55 WIB</span></p>
+                                <p class="text-sm text-slate-500">Pulang: <span class="font-bold text-slate-400">-</span></p>
+                            </div>
+                            <div class="card bg-white p-6 rounded-xl shadow">
+                                <h4 class="font-semibold text-slate-800">Akses Cepat</h4>
+                                <div class="mt-2 space-y-2">
+                                    <a href="#" data-view="history" class="nav-btn text-sm font-medium text-blue-600 hover:underline">Lihat Riwayat Absensi</a><br>
+                                    <a href="#" data-view="leave" class="nav-btn text-sm font-medium text-blue-600 hover:underline">Buat Pengajuan Izin/Cuti</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                } else if (view === 'admin' || view === 'kades') {
+                    const kadesSpecificContent = view === 'kades' ? `<div class="card bg-white p-6 rounded-xl shadow cursor-pointer" data-view="approval"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><h4 class="font-semibold text-slate-800">Persetujuan Izin</h4><p class="text-sm text-slate-500">${leaveRequestsData.filter(r => r.status === 'Menunggu').length} pengajuan menunggu</p></div></div></div>` : `<div class="card bg-white p-6 rounded-xl shadow cursor-pointer" data-view="generate-account"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg></div><div><h4 class="font-semibold text-slate-800">Generate Akun</h4><p class="text-sm text-slate-500">Buat akun untuk pegawai baru</p></div></div></div>`;
+                    content = `${header}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="card bg-white p-6 rounded-xl shadow"><div class="flex justify-between items-start"><h4 class="text-sm font-medium text-slate-500">Total Pegawai</h4><span class="text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></span></div><p class="text-3xl font-bold text-slate-800 mt-2">${employeesData.length}</p></div>
+                        <div class="card bg-white p-6 rounded-xl shadow"><div class="flex justify-between items-start"><h4 class="text-sm font-medium text-slate-500">Hadir Hari Ini</h4><span class="text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></span></div><p class="text-3xl font-bold text-green-600 mt-2">22</p></div>
+                        <div class="card bg-white p-6 rounded-xl shadow"><div class="flex justify-between items-start"><h4 class="text-sm font-medium text-slate-500">Terlambat</h4><span class="text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></span></div><p class="text-3xl font-bold text-amber-500 mt-2">3</p></div>
+                        <div class="card bg-white p-6 rounded-xl shadow"><div class="flex justify-between items-start"><h4 class="text-sm font-medium text-slate-500">Izin/Sakit</h4><span class="text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg></span></div><p class="text-3xl font-bold text-red-500 mt-2">1</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 card bg-white p-6 rounded-xl shadow">
+                            <h4 class="font-semibold text-slate-800 mb-4">Grafik Kehadiran Mingguan</h4>
+                            <div class="chart-container"><canvas id="attendanceChart"></canvas></div>
+                        </div>
+                        <div class="space-y-6">
+                            ${kadesSpecificContent}
+                            <div class="card bg-white p-6 rounded-xl shadow cursor-pointer" data-view="reports"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div><div><h4 class="font-semibold text-slate-800">Laporan</h4><p class="text-sm text-slate-500">Cetak rekapitulasi data</p></div></div></div>
+                        </div>
+                    </div>`;
+                }
+                dashboardContent.innerHTML = content;
+                
+                if (view === 'pegawai') {
+                    const timeEl = document.getElementById('current-time');
+                    const dateEl = document.getElementById('current-date');
+                    const updateTime = () => {
+                        const now = new Date();
+                        timeEl.textContent = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                        dateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    };
+                    updateTime();
+                    setInterval(updateTime, 1000);
+                }
+                
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', (e) => switchView(e.target.dataset.view)));
+                dashboardContent.querySelectorAll('.card[data-view]').forEach(card => card.addEventListener('click', (e) => switchView(e.currentTarget.dataset.view)));
+
+
+                if (view === 'admin' || view === 'kades') {
+                    const ctx = document.getElementById('attendanceChart').getContext('2d');
+                    attendanceChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum'], datasets: [{ label: 'Hadir', data: [22, 23, 24, 22, 21], backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 }, { label: 'Terlambat', data: [3, 2, 1, 3, 4], backgroundColor: 'rgba(245, 158, 11, 0.7)', borderColor: 'rgba(245, 158, 11, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { color: '#64748b' } }, x: { ticks: { color: '#64748b' } } }, plugins: { legend: { position: 'top', labels: { color: '#334155' } } } } });
+                }
+            }
+
+            function renderEmployeeManagement(filter = '') {
+                const filteredData = employeesData.filter(emp => emp.nama.toLowerCase().includes(filter.toLowerCase()) || emp.nip.toLowerCase().includes(filter.toLowerCase()) || emp.jabatan.toLowerCase().includes(filter.toLowerCase()));
+                const employeeCards = filteredData.map(emp => `<div class="employee-card bg-white rounded-xl shadow p-5 text-center flex flex-col items-center"><div class="w-20 h-20 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-3xl font-bold mb-4">${emp.nama.charAt(0)}</div><h4 class="font-bold text-lg text-slate-800">${emp.nama}</h4><p class="text-sm text-slate-500">${emp.email}</p><span class="mt-2 text-xs font-semibold bg-slate-200 text-slate-700 px-3 py-1 rounded-full">${emp.jabatan}</span><div class="border-t my-4 w-full"></div><div class="flex gap-3"><button class="edit-btn p-2 text-slate-500 hover:text-blue-600" data-id="${emp.id}" title="Ubah"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button><button class="delete-btn p-2 text-slate-500 hover:text-red-600" data-id="${emp.id}" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button></div></div>`).join('');
+                const content = `<div id="print-area"><div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"><div class="w-full">
+                        <h2 class="text-3xl font-bold text-slate-800">Kelola Pegawai</h2>
+                        <p class="text-slate-500">Manajemen data pegawai desa.</p>
+                    </div>
+                    <div class="flex w-full md:w-auto gap-2 no-print">
+                        <div class="relative flex-grow"><input type="text" id="search-employee" placeholder="Cari pegawai..." class="form-input w-full pl-10 pr-4 py-2 border rounded-lg"><svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                        <button id="print-employees-btn" class="flex-shrink-0 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold flex items-center gap-2">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                            <span>Cetak</span>
+                        </button>
+                        <button id="add-employee-btn" class="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg><span>Tambah</span></button>
+                    </div>
+                    </div><div id="employee-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">${employeeCards || `<p class="col-span-full text-center text-slate-500">Tidak ada pegawai yang cocok dengan pencarian.</p>`}</div></div>`;
+                dashboardContent.innerHTML = content;
+                attachEmployeeEventListeners();
+            }
+
+            function renderReportsPage() {
+                if(reportChart) reportChart.destroy();
+                const employeeOptions = employeesData.map(emp => `<option value="${emp.id}">${emp.nama}</option>`).join('');
+                const content = `
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-slate-800">Laporan Kehadiran</h2>
+                        <p class="text-slate-500">Buat dan cetak rekapitulasi kehadiran pegawai.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow mb-6 no-print">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div><label for="start-date" class="text-sm font-medium">Tanggal Mulai</label><input type="date" id="start-date" class="form-input mt-1 w-full p-2 border rounded"></div>
+                            <div><label for="end-date" class="text-sm font-medium">Tanggal Selesai</label><input type="date" id="end-date" class="form-input mt-1 w-full p-2 border rounded"></div>
+                            <div><label for="report-employee" class="text-sm font-medium">Pilih Pegawai</label><select id="report-employee" class="form-input mt-1 w-full p-2 border rounded bg-white"><option value="all">Semua Pegawai</option>${employeeOptions}</select></div>
+                            <button id="generate-report-btn" class="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Buat Laporan</button>
+                        </div>
+                    </div>
+                    <div id="report-output">
+                        <div class="text-center py-12 text-slate-500">
+                            <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <h3 class="mt-2 text-sm font-medium text-slate-900">Belum ada laporan</h3>
+                            <p class="mt-1 text-sm text-slate-500">Silakan pilih filter di atas dan buat laporan.</p>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.getElementById('generate-report-btn').addEventListener('click', generateReport);
+            }
+
+            function generateReport() {
+                const reportOutput = document.getElementById('report-output');
+                const selectedEmployeeId = document.getElementById('report-employee').value;
+                const reportData = selectedEmployeeId === 'all' ? employeesData : employeesData.filter(e => e.id == selectedEmployeeId);
+                
+                const totalHadir = Math.floor(Math.random() * 20 * reportData.length) + reportData.length;
+                const totalTerlambat = Math.floor(Math.random() * 5 * reportData.length);
+                const totalIzin = Math.floor(Math.random() * 2 * reportData.length);
+
+                const tableRows = reportData.map(emp => `
+                    <tr class="border-b last:border-b-0">
+                        <td class="px-4 py-3 font-medium">${emp.nama}</td>
+                        <td class="px-4 py-3 text-center text-green-600 font-semibold">${Math.floor(Math.random() * 20) + 1}</td>
+                        <td class="px-4 py-3 text-center text-amber-600 font-semibold">${Math.floor(Math.random() * 5)}</td>
+                        <td class="px-4 py-3 text-center text-red-600 font-semibold">${Math.floor(Math.random() * 2)}</td>
+                        <td class="px-4 py-3 text-center">${(Math.random() * (160 - 120) + 120).toFixed(1)} Jam</td>
+                    </tr>
+                `).join('');
+
+                reportOutput.innerHTML = `
+                    <div id="print-area">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800">Laporan Kehadiran</h3>
+                                <p class="text-sm text-slate-500">Periode: 1 Agu 2025 - 23 Agu 2025</p>
+                            </div>
+                            <button id="print-pdf-btn" class="no-print px-4 py-2 bg-white border rounded-lg hover:bg-slate-50 text-sm font-semibold flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                                <span>Cetak PDF</span>
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow">
+                                <h4 class="font-semibold text-slate-800 mb-4">Detail Rekapitulasi</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-sm text-left">
+                                        <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                                            <tr>
+                                                <th class="px-4 py-3">Nama Pegawai</th>
+                                                <th class="px-4 py-3 text-center">Hadir</th>
+                                                <th class="px-4 py-3 text-center">Terlambat</th>
+                                                <th class="px-4 py-3 text-center">Izin/Sakit</th>
+                                                <th class="px-4 py-3 text-center">Total Jam Kerja</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>${tableRows}</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow flex flex-col justify-center items-center">
+                                 <h4 class="font-semibold text-slate-800 mb-4">Ringkasan</h4>
+                                 <div class="report-chart-container"><canvas id="reportChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('print-pdf-btn').addEventListener('click', () => window.print());
+                
+                if (reportChart) reportChart.destroy();
+                const ctx = document.getElementById('reportChart').getContext('2d');
+                reportChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Hadir', 'Terlambat', 'Izin/Sakit'],
+                        datasets: [{
+                            data: [totalHadir, totalTerlambat, totalIzin],
+                            backgroundColor: ['#16a34a', '#f59e0b', '#dc2626'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            function renderSettingsPage() {
+                const content = `
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-slate-800">Pengaturan Sistem</h2>
+                        <p class="text-slate-500">Atur konfigurasi inti aplikasi SIAPDes.</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="card bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-semibold border-b pb-3 mb-4">Lokasi Kantor & Radius Absensi</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label for="latitude" class="text-sm font-medium">Latitude</label><input type="text" id="latitude" value="-6.9175" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                    <div><label for="longitude" class="text-sm font-medium">Longitude</label><input type="text" id="longitude" value="107.6191" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                    <div class="md:col-span-2"><label for="radius" class="text-sm font-medium">Radius Toleransi (meter)</label><input type="number" id="radius" value="50" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                </div>
+                            </div>
+                            <div class="card bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-semibold border-b pb-3 mb-4">Jam Kerja</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div><label for="start-time" class="text-sm font-medium">Jam Masuk</label><input type="time" id="start-time" value="08:00" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                    <div><label for="end-time" class="text-sm font-medium">Jam Pulang</label><input type="time" id="end-time" value="16:00" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                    <div><label for="tolerance" class="text-sm font-medium">Toleransi (menit)</label><input type="number" id="tolerance" value="15" class="form-input mt-1 w-full p-2 border rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                             <div class="card bg-white p-6 rounded-xl shadow">
+                                <h3 class="text-lg font-semibold border-b pb-3 mb-4">Lainnya</h3>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h4 class="font-medium">Notifikasi Email</h4>
+                                            <p class="text-sm text-slate-500">Kirim notifikasi untuk pengajuan izin.</p>
+                                        </div>
+                                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                                            <input type="checkbox" name="toggle" id="email-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" checked/>
+                                            <label for="email-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                             </div>
+                             <button id="save-settings-btn" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Simpan Perubahan</button>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.getElementById('save-settings-btn').addEventListener('click', () => showToast('Pengaturan berhasil disimpan!'));
+            }
+            
+            function renderGenerateAccountPage() {
+                const content = `
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-slate-800">Generate Akun Pegawai</h2>
+                        <p class="text-slate-500">Buat akun login untuk pegawai baru.</p>
+                    </div>
+                    <div class="card bg-white p-6 rounded-xl shadow max-w-lg mx-auto">
+                        <form id="generate-account-form">
+                            <div class="space-y-4">
+                                <div><label for="gen-nama" class="text-sm font-medium">Nama Lengkap</label><input type="text" id="gen-nama" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                                <div><label for="gen-email" class="text-sm font-medium">Email</label><input type="email" id="gen-email" required class="form-input mt-1 w-full p-2 border rounded"></div>
+                            </div>
+                            <div class="mt-6">
+                                <button type="submit" class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">Buat Akun</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.getElementById('generate-account-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const employee = {
+                        email: document.getElementById('gen-email').value,
+                        nama: document.getElementById('gen-nama').value
+                    };
+                    const tempPassword = Math.random().toString(36).slice(-8);
+                    showAccountGeneratedModal(employee, tempPassword);
+                });
+            }
+
+            function renderHistoryPage() {
+                const historyData = [
+                    { date: 'Jumat, 22 Agu 2025', checkIn: '07:55', checkOut: '16:01', status: 'hadir' },
+                    { date: 'Kamis, 21 Agu 2025', checkIn: '08:10', checkOut: '16:05', status: 'terlambat' },
+                    { date: 'Rabu, 20 Agu 2025', checkIn: '07:58', checkOut: '16:00', status: 'hadir' },
+                    { date: 'Selasa, 19 Agu 2025', checkIn: '-', checkOut: '-', status: 'sakit' },
+                    { date: 'Senin, 18 Agu 2025', checkIn: '07:50', checkOut: '16:03', status: 'hadir' },
+                ];
+
+                const statusMap = {
+                    hadir: { color: 'text-green-600', bg: 'bg-green-100' },
+                    terlambat: { color: 'text-amber-600', bg: 'bg-amber-100' },
+                    sakit: { color: 'text-red-600', bg: 'bg-red-100' }
+                };
+
+                const historyList = historyData.map(item => `
+                    <tr class="border-b last:border-0">
+                        <td class="px-4 py-3 font-medium">${item.date}</td>
+                        <td class="px-4 py-3 text-center">${item.checkIn}</td>
+                        <td class="px-4 py-3 text-center">${item.checkOut}</td>
+                        <td class="px-4 py-3 text-center"><span class="px-2 py-1 text-xs font-medium rounded-full ${statusMap[item.status].bg} ${statusMap[item.status].color}">${item.status}</span></td>
+                    </tr>
+                `).join('');
+
+                const content = `
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-slate-800">Riwayat Absensi</h2>
+                        <p class="text-slate-500">Lihat rekapitulasi kehadiran Anda per bulan.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow mb-6">
+                        <label for="month-filter" class="text-sm font-medium">Tampilkan untuk bulan:</label>
+                        <select id="month-filter" class="form-input mt-1 w-full md:w-auto p-2 border rounded bg-white">
+                            <option>Agustus 2025</option>
+                            <option>Juli 2025</option>
+                            <option>Juni 2025</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-xl shadow text-center"><p class="text-2xl font-bold text-green-600">15</p><p class="text-sm text-slate-500">Hadir</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow text-center"><p class="text-2xl font-bold text-amber-600">1</p><p class="text-sm text-slate-500">Terlambat</p></div>
+                        <div class="bg-white p-4 rounded-xl shadow text-center"><p class="text-2xl font-bold text-red-600">1</p><p class="text-sm text-slate-500">Izin/Sakit</p></div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                                    <tr>
+                                        <th class="px-4 py-3">Tanggal</th>
+                                        <th class="px-4 py-3 text-center">Jam Masuk</th>
+                                        <th class="px-4 py-3 text-center">Jam Pulang</th>
+                                        <th class="px-4 py-3 text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${historyList}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+            }
+
+            function renderLeavePage() {
+                const statusMap = {
+                    'Disetujui': { color: 'text-green-600', bg: 'bg-green-100' },
+                    'Ditolak': { color: 'text-red-600', bg: 'bg-red-100' },
+                    'Menunggu': { color: 'text-amber-600', bg: 'bg-amber-100' }
+                };
+
+                const leaveList = leaveRequestsData.filter(r => r.employee === userNameEl.textContent).map(req => `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <div>
+                            <p class="font-bold text-slate-800">${req.type}</p>
+                            <p class="text-sm text-slate-500">${req.startDate} s/d ${req.endDate}</p>
+                            <p class="text-xs text-slate-400 mt-1">${req.reason}</p>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full ${statusMap[req.status].bg} ${statusMap[req.status].color}">${req.status}</span>
+                    </div>
+                `).join('');
+
+                const content = `
+                     <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-800">Pengajuan Izin/Cuti</h2>
+                            <p class="text-slate-500">Buat pengajuan baru dan lihat riwayat pengajuan Anda.</p>
+                        </div>
+                        <button id="add-leave-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                            <span>Buat Pengajuan Baru</span>
+                        </button>
+                    </div>
+                    <div class="space-y-4">
+                        ${leaveList || `<p class="text-center text-slate-500">Belum ada riwayat pengajuan.</p>`}
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.getElementById('add-leave-btn').addEventListener('click', showLeaveModal);
+            }
+            
+            function renderApprovalPage() {
+                const statusMap = {
+                    'Disetujui': { color: 'text-green-600', bg: 'bg-green-100' },
+                    'Ditolak': { color: 'text-red-600', bg: 'bg-red-100' },
+                    'Menunggu': { color: 'text-amber-600', bg: 'bg-amber-100' }
+                };
+
+                const pendingRequests = leaveRequestsData.filter(r => r.status === 'Menunggu');
+                const historyRequests = leaveRequestsData.filter(r => r.status !== 'Menunggu');
+
+                const pendingList = pendingRequests.map(req => `
+                    <div class="bg-white p-4 rounded-lg shadow-sm border">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-slate-800">${req.employee}</p>
+                                <p class="text-sm text-slate-500">${req.type} | ${req.startDate} s/d ${req.endDate}</p>
+                            </div>
+                            <span class="text-xs font-bold px-3 py-1 rounded-full ${statusMap[req.status].bg} ${statusMap[req.status].color}">${req.status}</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mt-2 p-3 bg-slate-50 rounded-md">${req.reason}</p>
+                        <div class="flex gap-2 justify-end mt-4">
+                            <button data-id="${req.id}" class="reject-btn px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-md hover:bg-red-200">Tolak</button>
+                            <button data-id="${req.id}" class="approve-btn px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-md hover:bg-green-200">Setujui</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const historyList = historyRequests.map(req => `
+                    <li class="flex items-center justify-between p-4 border-b last:border-0">
+                        <div>
+                            <p class="font-semibold text-slate-800">${req.employee} <span class="text-sm font-normal text-slate-500">- ${req.type}</span></p>
+                            <p class="text-xs text-slate-400">${req.startDate} s/d ${req.endDate}</p>
+                        </div>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full ${statusMap[req.status].bg} ${statusMap[req.status].color}">${req.status}</span>
+                    </li>
+                `).join('');
+
+                const content = `
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-slate-800">Persetujuan Izin/Cuti</h2>
+                        <p class="text-slate-500">Tinjau dan berikan keputusan untuk pengajuan dari pegawai.</p>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                        <div class="lg:col-span-2 space-y-4">
+                            <h3 class="text-lg font-semibold text-slate-700">Menunggu Keputusan</h3>
+                            ${pendingList || `<div class="bg-white p-6 rounded-lg text-center text-slate-500">Tidak ada pengajuan yang menunggu.</div>`}
+                        </div>
+                        <div class="bg-white rounded-xl shadow">
+                            <h3 class="text-lg font-semibold text-slate-700 p-4 border-b">Riwayat Persetujuan</h3>
+                            <ul>
+                                ${historyList}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.querySelectorAll('.approve-btn, .reject-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        const isApproved = e.currentTarget.classList.contains('approve-btn');
+                        const request = leaveRequestsData.find(r => r.id == id);
+                        if (request) {
+                            request.status = isApproved ? 'Disetujui' : 'Ditolak';
+                            renderApprovalPage();
+                            showToast(`Pengajuan dari ${request.employee} telah ${isApproved ? 'disetujui' : 'ditolak'}.`);
+                        }
+                    });
+                });
+            }
+
+            function renderVillageProfilePage() {
+                if(populationChart) populationChart.destroy();
+                const officials = [
+                    { name: 'Ahmad Subarjo', title: 'Kepala Desa', img: 'https://placehold.co/100x100/e0e7ff/3730a3?text=AS' },
+                    { name: 'Budi Santoso', title: 'Sekretaris Desa', img: 'https://placehold.co/100x100/e0e7ff/3730a3?text=BS' },
+                    { name: 'Siti Aminah', title: 'Kaur Keuangan', img: 'https://placehold.co/100x100/e0e7ff/3730a3?text=SA' },
+                    { name: 'Eko Prasetyo', title: 'Kasi Pemerintahan', img: 'https://placehold.co/100x100/e0e7ff/3730a3?text=EP' },
+                ];
+                const officialCards = officials.map(p => `
+                    <div class="text-center">
+                        <img src="${p.img}" class="w-24 h-24 rounded-full mx-auto mb-2 shadow-md">
+                        <h5 class="font-bold text-slate-800">${p.name}</h5>
+                        <p class="text-sm text-slate-500">${p.title}</p>
+                    </div>
+                `).join('');
+
+                const content = `
+                    <div class="relative h-48 md:h-64 rounded-xl overflow-hidden mb-8">
+                        <img src="https://placehold.co/1200x400/86efac/1c1917?text=Desa+Makmur+Jaya" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-center text-white p-4">
+                            <h1 class="text-4xl md:text-5xl font-extrabold">Profil Desa Makmur Jaya</h1>
+                            <p class="mt-2 max-w-2xl">Selamat datang di pusat informasi Desa Makmur Jaya. Temukan semua yang perlu Anda ketahui tentang desa kami.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="card bg-white p-5 rounded-xl shadow flex items-center gap-4"><div class="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div><div><p class="text-sm text-slate-500">Luas Wilayah</p><p class="font-bold text-lg">150 Ha</p></div></div>
+                        <div class="card bg-white p-5 rounded-xl shadow flex items-center gap-4"><div class="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><div><p class="text-sm text-slate-500">Jumlah Penduduk</p><p class="font-bold text-lg">3,250 Jiwa</p></div></div>
+                        <div class="card bg-white p-5 rounded-xl shadow flex items-center gap-4"><div class="w-12 h-12 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg></div><div><p class="text-sm text-slate-500">Jumlah Keluarga</p><p class="font-bold text-lg">875 KK</p></div></div>
+                        <div class="card bg-white p-5 rounded-xl shadow flex items-center gap-4"><div class="w-12 h-12 rounded-lg bg-red-100 text-red-600 flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg></div><div><p class="text-sm text-slate-500">Kepadatan</p><p class="font-bold text-lg">21.6 jiwa/Ha</p></div></div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold">Informasi Desa</h3>
+                            <button id="edit-profile-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                                <span>Ubah Data</span>
+                            </button>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-semibold text-lg text-slate-800 border-b pb-2 mb-2">Sejarah Singkat</h4>
+                                <textarea readonly rows="4" class="editable-textarea form-input w-full text-slate-600 text-sm leading-relaxed border rounded p-2">Desa Makmur Jaya didirikan pada tahun 1980 sebagai hasil pemekaran dari desa tetangga. Nama 'Makmur Jaya' dipilih dengan harapan agar desa ini senantiasa sejahtera dan maju. Sejak awal, mayoritas penduduknya bekerja di sektor pertanian, dengan padi sebagai komoditas utama.</textarea>
+                            </div>
+                             <div>
+                                <h4 class="font-semibold text-lg text-slate-800 border-b pb-2 mb-2">Visi & Misi</h4>
+                                 <label class="font-bold text-slate-700 text-sm">Visi:</label>
+                                 <textarea readonly class="editable-textarea form-input w-full text-slate-600 text-sm leading-relaxed border rounded p-2 mb-2">Terwujudnya Desa Makmur Jaya yang adil, sejahtera, dan berbudaya.</textarea>
+                                 <label class="font-bold text-slate-700 text-sm">Misi:</label>
+                                 <textarea readonly rows="2" class="editable-textarea form-input w-full text-slate-600 text-sm leading-relaxed border rounded p-2">Meningkatkan kualitas sumber daya manusia, mengembangkan potensi ekonomi lokal, serta melestarikan kearifan lokal.</textarea>
+                            </div>
+                             <div>
+                                 <h4 class="font-semibold text-lg text-slate-800 border-b pb-2 mb-4">Aparat Desa</h4>
+                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    ${officialCards}
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                
+                const editProfileBtn = document.getElementById('edit-profile-btn');
+                const textareas = dashboardContent.querySelectorAll('.editable-textarea');
+
+                editProfileBtn.addEventListener('click', () => {
+                    const isEditing = editProfileBtn.textContent.trim() === 'Simpan Perubahan';
+                    if (isEditing) {
+                        textareas.forEach(ta => {
+                            ta.readOnly = true;
+                            ta.classList.remove('editing');
+                        });
+                        editProfileBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg><span>Ubah Data</span>`;
+                        showToast('Profil desa berhasil diperbarui!');
+                    } else {
+                        textareas.forEach(ta => {
+                            ta.readOnly = false;
+                             ta.classList.add('editing');
+                        });
+                        editProfileBtn.innerHTML = `<span>Simpan Perubahan</span>`;
+                    }
+                });
+            }
+
+            function renderPlaceholderPage() {
+                dashboardContent.innerHTML = `
+                    <div class="text-center py-24">
+                        <h2 class="text-2xl font-bold text-slate-800">Segera Hadir</h2>
+                        <p class="text-slate-500 mt-2">Fitur ini sedang dalam tahap pengembangan.</p>
+                    </div>
+                `;
+            }
+            
+            function renderAssignmentPage() {
+                const priorityMap = {
+                    'Tinggi': 'bg-red-100 text-red-800',
+                    'Sedang': 'bg-amber-100 text-amber-800',
+                    'Rendah': 'bg-blue-100 text-blue-800',
+                };
+
+                const columns = {
+                    'Baru': assignmentsData.filter(t => t.status === 'Baru'),
+                    'Dikerjakan': assignmentsData.filter(t => t.status === 'Dikerjakan'),
+                    'Selesai': assignmentsData.filter(t => t.status === 'Selesai'),
+                };
+
+                const columnCards = (tasks) => {
+                    if (tasks.length === 0) return '<p class="text-sm text-slate-500 px-2">Tidak ada tugas.</p>';
+                    return tasks.map(task => `
+                        <div class="task-card bg-white p-3 rounded-lg shadow-sm border" draggable="true" data-id="${task.id}">
+                            <h5 class="font-semibold text-sm">${task.title}</h5>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-xs text-slate-500">${task.assignee}</span>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${priorityMap[task.priority]}">${task.priority}</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">Selesai: ${task.dueDate}</p>
+                        </div>
+                    `).join('');
+                };
+
+                const content = `
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-800">Papan Penugasan</h2>
+                            <p class="text-slate-500">Kelola dan pantau tugas untuk pegawai desa.</p>
+                        </div>
+                        <button id="add-assignment-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                            <span>Tugas Baru</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-slate-200 p-4 rounded-xl">
+                            <h3 class="font-bold text-slate-800 text-center mb-4">Baru</h3>
+                            <div class="space-y-3">${columnCards(columns['Baru'])}</div>
+                        </div>
+                         <div class="bg-slate-200 p-4 rounded-xl">
+                            <h3 class="font-bold text-slate-800 text-center mb-4">Dikerjakan</h3>
+                            <div class="space-y-3">${columnCards(columns['Dikerjakan'])}</div>
+                        </div>
+                         <div class="bg-slate-200 p-4 rounded-xl">
+                            <h3 class="font-bold text-slate-800 text-center mb-4">Selesai</h3>
+                            <div class="space-y-3">${columnCards(columns['Selesai'])}</div>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                document.getElementById('add-assignment-btn').addEventListener('click', showAssignmentModal);
+            }
+            
+            function renderPopulationPage(filter = '') {
+                const filteredData = populationData.filter(p => p.nama.toLowerCase().includes(filter.toLowerCase()) || p.nik.includes(filter));
+
+                const tableRows = filteredData.map(p => `
+                    <tr class="border-b last:border-b-0">
+                        <td class="px-4 py-3 font-medium">${p.nik}</td>
+                        <td class="px-4 py-3">${p.nama}</td>
+                        <td class="px-4 py-3 text-slate-500">${p.ttl}</td>
+                        <td class="px-4 py-3 text-slate-500">${p.gender}</td>
+                        <td class="px-4 py-3 text-slate-500">${p.address}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-2">
+                                <button class="edit-population-btn text-blue-600 hover:underline" data-id="${p.id}">Ubah</button>
+                                <button class="delete-population-btn text-red-600 hover:underline" data-id="${p.id}">Hapus</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                const content = `
+                    <div id="print-area">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                            <div class="w-full">
+                                <h2 class="text-3xl font-bold text-slate-800">Data Penduduk</h2>
+                                <p class="text-slate-500">Manajemen data kependudukan desa.</p>
+                            </div>
+                            <div class="flex w-full md:w-auto gap-2 no-print">
+                                <div class="relative flex-grow"><input type="text" id="search-population" placeholder="Cari NIK atau nama..." class="form-input w-full pl-10 pr-4 py-2 border rounded-lg"><svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                                <button id="print-population-btn" class="flex-shrink-0 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold flex items-center gap-2">
+                                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                                    <span>Cetak</span>
+                                </button>
+                                <button id="add-population-btn" class="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                    <span>Tambah</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                                        <tr>
+                                            <th class="px-4 py-3">NIK</th>
+                                            <th class="px-4 py-3">Nama</th>
+                                            <th class="px-4 py-3">Tgl Lahir</th>
+                                            <th class="px-4 py-3">L/P</th>
+                                            <th class="px-4 py-3">Alamat</th>
+                                            <th class="px-4 py-3 no-print">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${tableRows}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                dashboardContent.innerHTML = content;
+                attachPopulationEventListeners();
+            }
+
+            function attachEmployeeEventListeners() {
+                document.getElementById('add-employee-btn').addEventListener('click', showAddModal);
+                document.getElementById('search-employee').addEventListener('input', (e) => renderEmployeeManagement(e.target.value));
+                document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => showEditModal(e.currentTarget.dataset.id)));
+                document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => showDeleteModal(e.currentTarget.dataset.id, 'employee')));
+                document.getElementById('print-employees-btn').addEventListener('click', () => window.print());
+            }
+
+            function attachPopulationEventListeners() {
+                document.getElementById('add-population-btn').addEventListener('click', showAddPopulationModal);
+                document.getElementById('search-population').addEventListener('input', (e) => renderPopulationPage(e.target.value));
+                document.querySelectorAll('.edit-population-btn').forEach(btn => btn.addEventListener('click', (e) => showEditPopulationModal(e.currentTarget.dataset.id)));
+                document.querySelectorAll('.delete-population-btn').forEach(btn => btn.addEventListener('click', (e) => showDeleteModal(e.currentTarget.dataset.id, 'population')));
+                document.getElementById('print-population-btn').addEventListener('click', () => window.print());
+            }
+            
+            function showToast(message) {
+                toastMessage.textContent = message;
+                toast.classList.remove('translate-x-[120%]');
+                setTimeout(() => {
+                    toast.classList.add('translate-x-[120%]');
+                }, 3000);
+            }
+
+            function showAddModal() {
+                employeeForm.reset();
+                document.getElementById('employee-id').value = '';
+                modalTitle.textContent = 'Tambah Pegawai Baru';
+                employeeModal.classList.remove('hidden');
+                setTimeout(() => employeeModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+
+            function showEditModal(id) {
+                const employee = employeesData.find(emp => emp.id == id);
+                if (employee) {
+                    document.getElementById('employee-id').value = employee.id;
+                    document.getElementById('nama').value = employee.nama;
+                    document.getElementById('nip').value = employee.nip;
+                    document.getElementById('jabatan').value = employee.jabatan;
+                    document.getElementById('email-pegawai').value = employee.email;
+                    modalTitle.textContent = 'Ubah Data Pegawai';
+                    employeeModal.classList.remove('hidden');
+                    setTimeout(() => employeeModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+                }
+            }
+
+            function showAddPopulationModal() {
+                populationForm.reset();
+                document.getElementById('population-id').value = '';
+                document.getElementById('population-modal-title').textContent = 'Tambah Data Penduduk';
+                populationModal.classList.remove('hidden');
+                setTimeout(() => populationModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+
+            function showEditPopulationModal(id) {
+                const resident = populationData.find(p => p.id == id);
+                if(resident) {
+                    document.getElementById('population-id').value = resident.id;
+                    document.getElementById('pop-nik').value = resident.nik;
+                    document.getElementById('pop-nama').value = resident.nama;
+                    document.getElementById('pop-ttl').value = resident.ttl;
+                    document.getElementById('pop-gender').value = resident.gender;
+                    document.getElementById('pop-address').value = resident.address;
+                    document.getElementById('population-modal-title').textContent = 'Ubah Data Penduduk';
+                    populationModal.classList.remove('hidden');
+                    setTimeout(() => populationModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+                }
+            }
+
+            function showDeleteModal(id, type) {
+                itemToDelete = { id, type };
+                const message = type === 'employee' ? 'Apakah Anda yakin ingin menghapus data pegawai ini? Tindakan ini tidak dapat dibatalkan.' : 'Apakah Anda yakin ingin menghapus data penduduk ini? Tindakan ini tidak dapat dibatalkan.';
+                document.getElementById('delete-message').textContent = message;
+                deleteModal.classList.remove('hidden');
+                setTimeout(() => deleteModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+            
+            function showAccountGeneratedModal(employee, password) {
+                document.getElementById('generated-email').textContent = employee.email;
+                document.getElementById('generated-password').textContent = password;
+                accountGeneratedModal.classList.remove('hidden');
+                setTimeout(() => accountGeneratedModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+            
+            function showLeaveModal() {
+                leaveForm.reset();
+                leaveModal.classList.remove('hidden');
+                setTimeout(() => leaveModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+            
+            function showAssignmentModal() {
+                assignmentForm.reset();
+                const assigneeSelect = document.getElementById('assignment-assignee');
+                assigneeSelect.innerHTML = employeesData.map(emp => `<option value="${emp.nama}">${emp.nama}</option>`).join('');
+                assignmentModal.classList.remove('hidden');
+                setTimeout(() => assignmentModal.querySelector('.modal-content').classList.remove('scale-95'), 10);
+            }
+
+            function hideModals() {
+                document.querySelectorAll('.modal-content').forEach(modal => modal.classList.add('scale-95'));
+                setTimeout(() => {
+                    employeeModal.classList.add('hidden');
+                    deleteModal.classList.add('hidden');
+                    accountGeneratedModal.classList.add('hidden');
+                    leaveModal.classList.add('hidden');
+                    assignmentModal.classList.add('hidden');
+                    populationModal.classList.add('hidden');
+                }, 300);
+            }
+
+            employeeForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('employee-id').value;
+                const employeeData = {
+                    nama: document.getElementById('nama').value,
+                    nip: document.getElementById('nip').value,
+                    jabatan: document.getElementById('jabatan').value,
+                    email: document.getElementById('email-pegawai').value,
+                };
+
+                if (id) { // Update
+                    const index = employeesData.findIndex(emp => emp.id == id);
+                    employeesData[index] = { ...employeesData[index], ...employeeData };
+                    showToast('Data pegawai berhasil diperbarui.');
+                    hideModals();
+                    renderEmployeeManagement(document.getElementById('search-employee')?.value || '');
+                } else { // Create
+                    employeeData.id = Date.now();
+                    employeesData.push(employeeData);
+                    hideModals();
+                    renderEmployeeManagement();
+                    showToast('Pegawai baru berhasil ditambahkan.');
+                }
+            });
+
+            populationForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = document.getElementById('population-id').value;
+                const residentData = {
+                    nik: document.getElementById('pop-nik').value,
+                    nama: document.getElementById('pop-nama').value,
+                    ttl: document.getElementById('pop-ttl').value,
+                    gender: document.getElementById('pop-gender').value,
+                    address: document.getElementById('pop-address').value,
+                };
+
+                if (id) { // Update
+                    const index = populationData.findIndex(p => p.id == id);
+                    populationData[index] = { ...populationData[index], ...residentData };
+                    showToast('Data penduduk berhasil diperbarui.');
+                } else { // Create
+                    residentData.id = Date.now();
+                    populationData.push(residentData);
+                    showToast('Data penduduk baru berhasil ditambahkan.');
+                }
+                hideModals();
+                renderPopulationPage(document.getElementById('search-population')?.value || '');
+            });
+
+            leaveForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newLeaveRequest = {
+                    id: Date.now(),
+                    type: document.getElementById('leave-type').value,
+                    startDate: document.getElementById('leave-start-date').value,
+                    endDate: document.getElementById('leave-end-date').value,
+                    reason: document.getElementById('leave-reason').value,
+                    status: 'Menunggu',
+                    employee: userNameEl.textContent
+                };
+                leaveRequestsData.unshift(newLeaveRequest);
+                hideModals();
+                renderLeavePage();
+                showToast('Pengajuan berhasil dikirim.');
+            });
+
+            assignmentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newAssignment = {
+                    id: Date.now(),
+                    title: document.getElementById('assignment-title').value,
+                    assignee: document.getElementById('assignment-assignee').value,
+                    dueDate: document.getElementById('assignment-due-date').value,
+                    priority: document.getElementById('assignment-priority').value,
+                    status: 'Baru'
+                };
+                assignmentsData.unshift(newAssignment);
+                hideModals();
+                renderAssignmentPage();
+                showToast('Tugas baru berhasil ditambahkan.');
+            });
+
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (itemToDelete.type === 'employee') {
+                    employeesData = employeesData.filter(emp => emp.id != itemToDelete.id);
+                    renderEmployeeManagement(document.getElementById('search-employee')?.value || '');
+                    showToast('Data pegawai berhasil dihapus.');
+                } else if (itemToDelete.type === 'population') {
+                    populationData = populationData.filter(p => p.id != itemToDelete.id);
+                    renderPopulationPage(document.getElementById('search-population')?.value || '');
+                    showToast('Data penduduk berhasil dihapus.');
+                }
+                hideModals();
+            });
+
+            copyPasswordBtn.addEventListener('click', () => {
+                const password = document.getElementById('generated-password').textContent;
+                navigator.clipboard.writeText(password).then(() => {
+                    showToast('Password berhasil disalin!');
+                });
+            });
+
+            document.querySelectorAll('.modal-cancel-btn, .modal-backdrop').forEach(el => el.addEventListener('click', hideModals));
+        });
+    </script>
+</body>
+</html>
