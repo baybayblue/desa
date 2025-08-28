@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengelolaan Keuangan Desa - Transparan & Akuntabel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container { position: relative; height: 300px; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-landmark text-green-600 text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900">Siskeudes - Desa Mulyajaya</h1>
+                </div>
+                <nav class="flex items-center space-x-4">
+                    <button class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-bell mr-1"></i> Notifikasi
+                    </button>
+                    <button class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-user-circle mr-1"></i> Admin
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Dashboard Overview -->
+        <section class="mb-8 fade-in">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard Keuangan Desa</h2>
+            
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Anggaran</p>
+                            <p class="text-2xl font-bold text-gray-900">Rp 2.5M</p>
+                            <p class="text-sm text-green-600 mt-1">
+                                <i class="fas fa-arrow-up"></i> 12% dari tahun lalu
+                            </p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Realisasi Pemasukan</p>
+                            <p class="text-2xl font-bold text-gray-900">Rp 1.8M</p>
+                            <p class="text-sm text-green-600 mt-1">
+                                <i class="fas fa-check-circle"></i> 72% tercapai
+                            </p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-arrow-down text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Realisasi Pengeluaran</p>
+                            <p class="text-2xl font-bold text-gray-900">Rp 1.2M</p>
+                            <p class="text-sm text-yellow-600 mt-1">
+                                <i class="fas fa-exclamation-triangle"></i> 48% terpakai
+                            </p>
+                        </div>
+                        <div class="bg-red-100 rounded-full p-3">
+                            <i class="fas fa-arrow-up text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Sisa Anggaran</p>
+                            <p class="text-2xl font-bold text-gray-900">Rp 600M</p>
+                            <p class="text-sm text-blue-600 mt-1">
+                                <i class="fas fa-piggy-bank"></i> 24% tersisa
+                            </p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <i class="fas fa-coins text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Pemasukan vs Pengeluaran Chart -->
+            <div class="bg-white rounded-lg shadow p-6 fade-in">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Pemasukan vs Pengeluaran</h3>
+                <div class="chart-container">
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Pembagian Anggaran Chart -->
+            <div class="bg-white rounded-lg shadow p-6 fade-in">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Pembagian Anggaran per Sektor</h3>
+                <div class="chart-container">
+                    <canvas id="budgetAllocationChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transaction Table -->
+        <section class="bg-white rounded-lg shadow mb-8 fade-in">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Transaksi Terbaru</h3>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm">
+                            <i class="fas fa-plus mr-1"></i> Tambah Transaksi
+                        </button>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
+                            <i class="fas fa-download mr-1"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15 Nov 2024</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Infrastruktur
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Pembangunan Jalan Desa</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-red-600 font-medium">Pengeluaran</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 50.000.000</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Selesai
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
+                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">12 Nov 2024</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    PAD
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Pajak Bumi dan Bangunan</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-green-600 font-medium">Pemasukan</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 25.000.000</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Selesai
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
+                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
+                            </td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10 Nov 2024</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    Pendidikan
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">Bantuan Beasiswa Siswa</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-red-600 font-medium">Pengeluaran</span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 15.000.000</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Proses
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
+                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Document Section -->
+        <section class="mb-8 fade-in">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Dokumen Laporan Keuangan</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
+                        <span class="text-xs text-gray-500">2.5 MB</span>
+                    </div>
+                    <h4 class="font-medium text-gray-900 mb-2">Laporan Keuangan Triwulan III</h4>
+                    <p class="text-sm text-gray-600 mb-3">Laporan realisasi anggaran periode Juli-September 2024</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Diupload 5 Nov 2024</span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-file-excel text-green-500 text-3xl"></i>
+                        <span class="text-xs text-gray-500">1.2 MB</span>
+                    </div>
+                    <h4 class="font-medium text-gray-900 mb-2">Data Transaksi Oktober 2024</h4>
+                    <p class="text-sm text-gray-600 mb-3">Rekapitulasi semua transaksi bulan Oktober</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Diupload 1 Nov 2024</span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                    <div class="flex items-center justify-between mb-4">
+                        <i class="fas fa-file-word text-blue-500 text-3xl"></i>
+                        <span class="text-xs text-gray-500">856 KB</span>
+                    </div>
+                    <h4 class="font-medium text-gray-900 mb-2">Rencana Anggaran 2025</h4>
+                    <p class="text-sm text-gray-600 mb-3">Usulan rencana kerja dan anggaran tahun 2025</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-500">Diupload 28 Okt 2024</span>
+                        <button class="text-blue-600 hover:text-blue-800 text-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transparency Info -->
+        <section class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 fade-in">
+            <div class="flex items-start">
+                <i class="fas fa-shield-alt text-green-600 text-2xl mr-4 mt-1"></i>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Komitmen Transparansi</h3>
+                    <p class="text-gray-700 mb-3">
+                        Desa Mulyajaya berkomitmen untuk mengelola keuangan secara transparan dan akuntabel. 
+                        Setiap rupiah dana desa dapat dipertanggungjawabkan kepada masyarakat.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-1"></i> Real-time Update
+                        </span>
+                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-1"></i> Audit Berkala
+                        </span>
+                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
+                            <i class="fas fa-check text-green-600 mr-1"></i> Publik Terbuka
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Tentang Siskeudes</h4>
+                    <p class="text-gray-400 text-sm">
+                        Sistem informasi keuangan desa yang dirancang untuk meningkatkan transparansi 
+                        dan akuntabilitas pengelolaan dana desa.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Kontak</h4>
+                    <p class="text-gray-400 text-sm mb-2">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Kantor Desa Mulyajaya
+                    </p>
+                    <p class="text-gray-400 text-sm mb-2">
+                        <i class="fas fa-phone mr-2"></i>(0274) 123456
+                    </p>
+                    <p class="text-gray-400 text-sm">
+                        <i class="fas fa-envelope mr-2"></i>info@desamulyajaya.go.id
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Link Terkait</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Website Resmi Desa</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Kementerian Desa</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Lapor.go.id</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; 2024 Siskeudes Desa Mulyajaya. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Chart.js Configuration
+        const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
+        const incomeExpenseChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov'],
+                datasets: [{
+                    label: 'Pemasukan',
+                    data: [150, 180, 200, 170, 220, 250, 180, 200, 150, 180, 200],
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Pengeluaran',
+                    data: [100, 120, 150, 130, 160, 180, 140, 160, 120, 150, 120],
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value + 'jt';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('budgetAllocationChart').getContext('2d');
+        const budgetAllocationChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: ['Infrastruktur', 'Pendidikan', 'Kesehatan', 'Pemberdayaan', 'Administrasi'],
+                datasets: [{
+                    data: [35, 25, 20, 15, 5],
+                    backgroundColor: [
+                        'rgb(59, 130, 246)',
+                        'rgb(168, 85, 247)',
+                        'rgb(34, 197, 94)',
+                        'rgb(251, 146, 60)',
+                        'rgb(156, 163, 175)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
