@@ -1746,48 +1746,59 @@
           },
         ];
 
-        let assignmentsData = [
-          {
-            id: 1,
-            title: "Siapkan laporan bulanan",
-            assignee: "Siti Aminah",
-            dueDate: "2025-08-30",
-            priority: "Tinggi",
-            status: "Dikerjakan",
-          },
-          {
-            id: 2,
-            title: "Rapat koordinasi RT/RW",
-            assignee: "Eko Prasetyo",
-            dueDate: "2025-09-05",
-            priority: "Sedang",
-            status: "Baru",
-          },
-          {
-            id: 3,
-            title: "Arsipkan surat masuk minggu ini",
-            assignee: "Dewi Lestari",
-            dueDate: "2025-08-29",
-            priority: "Rendah",
-            status: "Baru",
-          },
-          {
-            id: 4,
-            title: "Selesaikan rekapitulasi PBB",
-            assignee: "Siti Aminah",
-            dueDate: "2025-08-28",
-            priority: "Tinggi",
-            status: "Selesai",
-          },
-          {
-            id: 5,
-            title: "Kumpulkan data UMKM desa",
-            assignee: "Budi Santoso",
-            dueDate: "2025-09-15",
-            priority: "Sedang",
-            status: "Baru",
-          },
-        ];
+        // GANTI VARIABEL INI
+let assignmentsData = [
+  {
+    id: 1,
+    title: "Siapkan laporan bulanan",
+    assignee: "Siti Aminah",
+    dueDate: "2025-08-30",
+    priority: "Tinggi",
+    status: "Dikerjakan",
+    nomorSK: "SK/001/VIII/2025",
+    tanggalSK: "2025-08-01",
+  },
+  {
+    id: 2,
+    title: "Rapat koordinasi RT/RW",
+    assignee: "Eko Prasetyo",
+    dueDate: "2025-09-05",
+    priority: "Sedang",
+    status: "Baru",
+    nomorSK: "SK/002/VIII/2025",
+    tanggalSK: "2025-08-10",
+  },
+  {
+    id: 3,
+    title: "Arsipkan surat masuk minggu ini",
+    assignee: "Dewi Lestari",
+    dueDate: "2025-08-29",
+    priority: "Rendah",
+    status: "Baru",
+    nomorSK: "SK/003/VIII/2025",
+    tanggalSK: "2025-08-15",
+  },
+  {
+    id: 4,
+    title: "Selesaikan rekapitulasi PBB",
+    assignee: "Siti Aminah",
+    dueDate: "2025-08-28",
+    priority: "Tinggi",
+    status: "Selesai",
+    nomorSK: "SK/004/VIII/2025",
+    tanggalSK: "2025-08-18",
+  },
+  {
+    id: 5,
+    title: "Kumpulkan data UMKM desa",
+    assignee: "Budi Santoso",
+    dueDate: "2025-09-15",
+    priority: "Sedang",
+    status: "Baru",
+    nomorSK: "SK/005/VIII/2025",
+    tanggalSK: "2025-08-20",
+  },
+];
         let lettersData = [
           {
             id: 1,
@@ -3105,81 +3116,182 @@
         }
 
         function renderAssignmentPage() {
-          const priorityMap = {
-            Tinggi: "bg-red-100 text-red-800",
-            Sedang: "bg-amber-100 text-amber-800",
-            Rendah: "bg-blue-100 text-blue-800",
-          };
-          const columns = {
-            Baru: assignmentsData.filter((t) => t.status === "Baru"),
-            Dikerjakan: assignmentsData.filter(
-              (t) => t.status === "Dikerjakan"
-            ),
-            Selesai: assignmentsData.filter((t) => t.status === "Selesai"),
-          };
-          const columnCards = (tasks) => {
-            if (tasks.length === 0)
-              return '<p class="text-sm text-slate-500 px-2">Tidak ada tugas.</p>';
-            return tasks
-              .map(
-                (task) => `
-                        <div class="task-card bg-white p-3 rounded-lg shadow-sm border" draggable="true" data-id="${
-                          task.id
-                        }">
-                            <h5 class="font-semibold text-sm">${task.title}</h5>
-                            <div class="flex justify-between items-center mt-2">
-                                <span class="text-xs text-slate-500">${
-                                  task.assignee
-                                }</span>
-                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                  priorityMap[task.priority]
-                                }">${task.priority}</span>
-                            </div>
-                            <p class="text-xs text-slate-400 mt-1">Selesai: ${
-                              task.dueDate
-                            }</p>
-                        </div>
-                    `
-              )
-              .join("");
-          };
-          const content = `
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <div>
-                            <h2 class="text-3xl font-bold text-slate-800">Papan Penugasan</h2>
-                            <p class="text-slate-500">Kelola dan pantau tugas untuk pegawai desa.</p>
-                        </div>
-                        <button id="add-assignment-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                            <span>Tugas Baru</span>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-slate-200 p-4 rounded-xl">
-                            <h3 class="font-bold text-slate-800 text-center mb-4">Baru</h3>
-                            <div class="space-y-3">${columnCards(
-                              columns["Baru"]
-                            )}</div>
-                        </div>
-                         <div class="bg-slate-200 p-4 rounded-xl">
-                            <h3 class="font-bold text-slate-800 text-center mb-4">Dikerjakan</h3>
-                            <div class="space-y-3">${columnCards(
-                              columns["Dikerjakan"]
-                            )}</div>
-                        </div>
-                         <div class="bg-slate-200 p-4 rounded-xl">
-                            <h3 class="font-bold text-slate-800 text-center mb-4">Selesai</h3>
-                            <div class="space-y-3">${columnCards(
-                              columns["Selesai"]
-                            )}</div>
-                        </div>
-                    </div>
-                `;
-          dashboardContent.innerHTML = content;
-          document
-            .getElementById("add-assignment-btn")
-            .addEventListener("click", showAssignmentModal);
+    // Tambahkan opsi untuk dropdown pegawai
+    const employeeOptions = employeesData.map(emp => 
+        `<option value="${emp.nama}">${emp.nama}</option>`
+    ).join('');
+
+    const content = `
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-800">Papan Penugasan</h2>
+                <p class="text-slate-500">Kelola dan pantau tugas untuk pegawai desa.</p>
+            </div>
+            <button id="add-assignment-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                <span>Tambah Baris</span>
+            </button>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase">
+                        <tr>
+                            <th class="p-3">Nama</th>
+                            <th class="p-3">Nomor SK</th>
+                            <th class="p-3">Tanggal SK</th>
+                            <th class="p-3">Ditugaskan Kepada</th>
+                            <th class="p-3">Tanggal Selesai</th>
+                            <th class="p-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignment-table-body">
+                        ${assignmentsData.map(task => `
+                            <tr class="border-b last:border-b-0 hover:bg-slate-50" data-id="${task.id}">
+                                <td class="p-3">
+                                    <input type="text" class="w-full p-2 border rounded assignment-title" value="${task.title}" placeholder="Nama tugas">
+                                </td>
+                                <td class="p-3">
+                                    <input type="text" class="w-full p-2 border rounded assignment-nomor-sk" value="${task.nomorSK || ''}" placeholder="Nomor SK">
+                                </td>
+                                <td class="p-3">
+                                    <input type="date" class="w-full p-2 border rounded assignment-tanggal-sk" value="${task.tanggalSK || ''}">
+                                </td>
+                                <td class="p-3">
+                                    <select class="w-full p-2 border rounded assignment-assignee">
+                                        <option value="">-- Pilih Pegawai --</option>
+                                        ${employeeOptions}
+                                    </select>
+                                </td>
+                                <td class="p-3">
+                                    <input type="date" class="w-full p-2 border rounded assignment-due-date" value="${task.dueDate}">
+                                </td>
+                                <td class="p-3">
+                                    <button class="delete-assignment-btn text-red-600 hover:text-red-800">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-right">
+            <button id="save-all-assignments" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold">
+                Simpan Semua Perubahan
+            </button>
+        </div>
+    `;
+    
+    dashboardContent.innerHTML = content;
+    
+    // Set nilai dropdown untuk setiap baris
+    assignmentsData.forEach(task => {
+        const row = document.querySelector(`tr[data-id="${task.id}"]`);
+        if (row) {
+            const select = row.querySelector('.assignment-assignee');
+            if (select && task.assignee) {
+                // Set nilai selected untuk option yang sesuai
+                const option = Array.from(select.options).find(opt => opt.value === task.assignee);
+                if (option) option.selected = true;
+            }
         }
+    });
+    
+    // Event listener untuk tombol tambah baris
+    document.getElementById('add-assignment-btn').addEventListener('click', () => {
+        const newId = Date.now();
+        const newRow = `
+            <tr class="border-b last:border-b-0 hover:bg-slate-50" data-id="${newId}">
+                <td class="p-3">
+                    <input type="text" class="w-full p-2 border rounded assignment-title" placeholder="Nama tugas">
+                </td>
+                <td class="p-3">
+                    <input type="text" class="w-full p-2 border rounded assignment-nomor-sk" placeholder="Nomor SK">
+                </td>
+                <td class="p-3">
+                    <input type="date" class="w-full p-2 border rounded assignment-tanggal-sk">
+                </td>
+                <td class="p-3">
+                    <select class="w-full p-2 border rounded assignment-assignee">
+                        <option value="">-- Pilih Pegawai --</option>
+                        ${employeeOptions}
+                    </select>
+                </td>
+                <td class="p-3">
+                    <input type="date" class="w-full p-2 border rounded assignment-due-date">
+                </td>
+                <td class="p-3">
+                    <button class="delete-assignment-btn text-red-600 hover:text-red-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                    </button>
+                </td>
+            </tr>
+        `;
+        
+        document.getElementById('assignment-table-body').insertAdjacentHTML('beforeend', newRow);
+        
+        // Tambahkan event listener ke tombol delete yang baru
+        const newRowElement = document.querySelector(`tr[data-id="${newId}"]`);
+        newRowElement.querySelector('.delete-assignment-btn').addEventListener('click', function() {
+            newRowElement.remove();
+        });
+    });
+    
+    // Event listener untuk tombol delete
+    document.querySelectorAll('.delete-assignment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const id = row.dataset.id;
+            
+            if (confirm('Apakah Anda yakin ingin menghapus tugas ini?')) {
+                // Hapus dari data
+                assignmentsData = assignmentsData.filter(task => task.id != id);
+                // Hapus dari tampilan
+                row.remove();
+                showToast('Tugas berhasil dihapus');
+            }
+        });
+    });
+    
+    // Event listener untuk tombol simpan semua
+    document.getElementById('save-all-assignments').addEventListener('click', () => {
+        const rows = document.querySelectorAll('#assignment-table-body tr');
+        
+        rows.forEach(row => {
+            const id = row.dataset.id;
+            const task = assignmentsData.find(t => t.id == id);
+            
+            if (task) {
+                // Update data yang ada
+                task.title = row.querySelector('.assignment-title').value;
+                task.nomorSK = row.querySelector('.assignment-nomor-sk').value;
+                task.tanggalSK = row.querySelector('.assignment-tanggal-sk').value;
+                task.dueDate = row.querySelector('.assignment-due-date').value;
+                
+                // Handle single select
+                const select = row.querySelector('.assignment-assignee');
+                task.assignee = select.value;
+            } else {
+                // Tambah data baru
+                const newTask = {
+                    id: id,
+                    title: row.querySelector('.assignment-title').value,
+                    nomorSK: row.querySelector('.assignment-nomor-sk').value,
+                    tanggalSK: row.querySelector('.assignment-tanggal-sk').value,
+                    dueDate: row.querySelector('.assignment-due-date').value,
+                    assignee: row.querySelector('.assignment-assignee').value
+                };
+                assignmentsData.push(newTask);
+            }
+        });
+        
+        showToast('Semua perubahan berhasil disimpan');
+    });
+}
 
         function renderPopulationPage(filter = "") {
           const filteredData = populationData.filter(
