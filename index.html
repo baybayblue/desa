@@ -1,432 +1,1654 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pengelolaan Keuangan Desa - Transparan & Akuntabel</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SIAPDes - Pengajuan Surat Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .chart-container { position: relative; height: 300px; }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        .hero-pattern {
+            background-color: #0ea5e9;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .toast {
+            transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .loading-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* Print styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-content, #print-content * {
+                visibility: visible;
+            }
+            #print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <i class="fas fa-landmark text-green-600 text-2xl mr-3"></i>
-                    <h1 class="text-xl font-bold text-gray-900">Siskeudes - Desa Mulyajaya</h1>
+    <!-- Landing Page untuk Pengajuan Surat -->
+    <div id="citizen-landing-page" class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">SIAPDes</span>
                 </div>
-                <nav class="flex items-center space-x-4">
-                    <button class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                        <i class="fas fa-bell mr-1"></i> Notifikasi
-                    </button>
-                    <button class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                        <i class="fas fa-user-circle mr-1"></i> Admin
-                    </button>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Beranda</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Layanan</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Profil Desa</a>
+                    <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Kontak</a>
                 </nav>
+                <button id="admin-login-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                    Login Admin
+                </button>
+            </div>
+        </header>
+        <!-- Hero Section -->
+        <section class="hero-pattern py-16 md:py-24">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                    Pengajuan Surat Desa Online
+                </h1>
+                <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-10">
+                    Ajukan surat keterangan, domisili, dan lainnya secara online tanpa harus datang ke kantor desa.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button id="citizen-login-btn" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
+                        Login untuk Mengajukan Surat
+                    </button>
+                    <a href="#" class="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-blue-700 transition-colors">
+                        Pelajari Lebih Lanjut
+                    </a>
+                </div>
+            </div>
+        </section>
+        <!-- Features Section -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Mengapa Mengajukan Surat Online?</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Kemudahan dan kecepatan dalam mengurus administrasi desa tanpa harus meninggalkan rumah.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card-hover bg-gray-50 p-8 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 rounded-lg bg-blue-100 flex items-center justify-center mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Cepat & Praktis</h3>
+                        <p class="text-gray-600">
+                            Proses pengajuan surat hanya membutuhkan beberapa menit tanpa perlu antri di kantor desa.
+                        </p>
+                    </div>
+                    <div class="card-hover bg-gray-50 p-8 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 rounded-lg bg-green-100 flex items-center justify-center mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Aman & Terpercaya</h3>
+                        <p class="text-gray-600">
+                            Data pribadi Anda terlindungi dengan sistem keamanan yang terjamin dan validasi NIK yang akurat.
+                        </p>
+                    </div>
+                    <div class="card-hover bg-gray-50 p-8 rounded-xl shadow-sm">
+                        <div class="w-14 h-14 rounded-lg bg-purple-100 flex items-center justify-center mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-3">Tracking Real-time</h3>
+                        <p class="text-gray-600">
+                            Pantau status pengajuan surat Anda secara real-time dan dapatkan notifikasi saat surat selesai.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- How It Works Section -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Cara Mengajukan Surat</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto">
+                        Ikuti langkah mudah berikut untuk mengajukan surat secara online
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <!-- Step 1 -->
+                        <div class="flex-1 mb-10 md:mb-0 md:pr-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold mr-4">
+                                        1
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Daftar Akun</h3>
+                                </div>
+                                <p class="text-gray-600">
+                                    Buat akun dengan NIK dan data diri Anda yang valid untuk mengakses sistem.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="hidden md:block mx-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="flex-1 mb-10 md:mb-0 md:px-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold mr-4">
+                                        2
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Login ke Akun</h3>
+                                </div>
+                                <p class="text-gray-600">
+                                    Masuk menggunakan NIK dan password yang telah Anda daftarkan.
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="hidden md:block mx-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="flex-1 md:pl-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold mr-4">
+                                        3
+                                    </div>
+                                    <h3 class="text-xl font-bold text-gray-800">Ajukan Surat</h3>
+                                </div>
+                                <p class="text-gray-600">
+                                    Pilih jenis surat yang dibutuhkan, isi formulir, dan kirim pengajuan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- CTA Section -->
+        <section class="py-16 bg-blue-600">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold text-white mb-4">Siap Mengajukan Surat?</h2>
+                <p class="text-blue-100 max-w-2xl mx-auto mb-8">
+                    Daftar sekarang dan ajukan surat yang Anda butuhkan dengan mudah dan cepat.
+                </p>
+                <button id="citizen-register-btn-cta" class="px-8 py-3 bg-white text-blue-600 font-bold rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
+                    Daftar Sekarang
+                </button>
+            </div>
+        </section>
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-xl font-bold">SIAPDes</span>
+                        </div>
+                        <p class="text-gray-400">
+                            Sistem Informasi Administrasi Pelayanan Desa Terpadu
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Layanan</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white">Pengajuan Surat</a></li>
+                            <li><a href="#" class="hover:text-white">Informasi Desa</a></li>
+                            <li><a href="#" class="hover:text-white">Berita Desa</a></li>
+                            <li><a href="#" class="hover:text-white">Potensi Desa</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Tentang</h3>
+                        <ul class="space-y-2 text-gray-400">
+                            <li><a href="#" class="hover:text-white">Profil Desa</a></li>
+                            <li><a href="#" class="hover:text-white">Visi Misi</a></li>
+                            <li><a href="#" class="hover:text-white">Struktur Organisasi</a></li>
+                            <li><a href="#" class="hover:text-white">Kontak Kami</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Kontak</h3>
+                        <address class="not-italic text-gray-400">
+                            <p class="mb-2">Jl. Desa Makmur Jaya No. 123</p>
+                            <p class="mb-2">Kec. Cipta Karya, Kab. Sejahtera</p>
+                            <p class="mb-2">Telepon: (0231) 123456</p>
+                            <p>Email: info@desamakmurjaya.go.id</p>
+                        </address>
+                    </div>
+                </div>
+                <div class="border-t border-gray-700 mt-10 pt-6 text-center text-gray-400">
+                    <p>&copy; 2025 Desa Makmur Jaya. Hak Cipta Dilindungi.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Citizen Register Page -->
+    <div id="citizen-register-page" class="hidden min-h-screen flex items-center justify-center bg-gray-50">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-8">
+                <div class="mx-auto w-16 h-16 rounded-lg bg-blue-600 flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Daftar Akun Warga</h2>
+                <p class="text-gray-600 mt-2">Isi data diri Anda untuk membuat akun</p>
+            </div>
+            <form id="citizen-register-form" class="space-y-6">
+                <div>
+                    <label for="register-nik" class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
+                    <input
+                        type="text"
+                        id="register-nik"
+                        name="nik"
+                        placeholder="Masukkan NIK Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input
+                        type="text"
+                        id="register-name"
+                        name="name"
+                        placeholder="Masukkan nama lengkap Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                        type="email"
+                        id="register-email"
+                        name="email"
+                        placeholder="Masukkan email Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                    <input
+                        type="tel"
+                        id="register-phone"
+                        name="phone"
+                        placeholder="Masukkan nomor telepon Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-address" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                    <textarea
+                        id="register-address"
+                        name="address"
+                        rows="2"
+                        placeholder="Masukkan alamat lengkap Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    ></textarea>
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input
+                        type="password"
+                        id="register-password"
+                        name="password"
+                        placeholder="Buat password Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <label for="register-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
+                    <input
+                        type="password"
+                        id="register-confirm-password"
+                        name="confirmPassword"
+                        placeholder="Konfirmasi password Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
+                </div>
+                <div>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Daftar
+                    </button>
+                </div>
+            </form>
+            <div class="mt-6 text-center">
+                <p id="citizen-register-error" class="text-sm text-red-500 hidden">
+                    Terjadi kesalahan saat mendaftar. Silakan coba lagi.
+                </p>
+                <p class="text-sm text-gray-600 mt-4">
+                    Sudah punya akun?
+                    <button id="go-to-login-btn" class="text-blue-600 hover:text-blue-800 font-medium">
+                        Login di sini
+                    </button>
+                </p>
+                <button id="back-to-landing-from-register" class="mt-4 text-gray-600 hover:text-gray-800 font-medium">
+                    Kembali ke Halaman Utama
+                </button>
             </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Dashboard Overview -->
-        <section class="mb-8 fade-in">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard Keuangan Desa</h2>
-            
-            <!-- Stat Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total Anggaran</p>
-                            <p class="text-2xl font-bold text-gray-900">Rp 2.5M</p>
-                            <p class="text-sm text-green-600 mt-1">
-                                <i class="fas fa-arrow-up"></i> 12% dari tahun lalu
-                            </p>
-                        </div>
-                        <div class="bg-blue-100 rounded-full p-3">
-                            <i class="fas fa-wallet text-blue-600 text-xl"></i>
-                        </div>
-                    </div>
+    </div>
+    
+    <!-- Citizen Login Page -->
+    <div id="citizen-login-page" class="hidden min-h-screen flex items-center justify-center bg-gray-50">
+        <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+            <div class="text-center mb-8">
+                <div class="mx-auto w-16 h-16 rounded-lg bg-blue-600 flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
                 </div>
-
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Realisasi Pemasukan</p>
-                            <p class="text-2xl font-bold text-gray-900">Rp 1.8M</p>
-                            <p class="text-sm text-green-600 mt-1">
-                                <i class="fas fa-check-circle"></i> 72% tercapai
-                            </p>
-                        </div>
-                        <div class="bg-green-100 rounded-full p-3">
-                            <i class="fas fa-arrow-down text-green-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Realisasi Pengeluaran</p>
-                            <p class="text-2xl font-bold text-gray-900">Rp 1.2M</p>
-                            <p class="text-sm text-yellow-600 mt-1">
-                                <i class="fas fa-exclamation-triangle"></i> 48% terpakai
-                            </p>
-                        </div>
-                        <div class="bg-red-100 rounded-full p-3">
-                            <i class="fas fa-arrow-up text-red-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Sisa Anggaran</p>
-                            <p class="text-2xl font-bold text-gray-900">Rp 600M</p>
-                            <p class="text-sm text-blue-600 mt-1">
-                                <i class="fas fa-piggy-bank"></i> 24% tersisa
-                            </p>
-                        </div>
-                        <div class="bg-purple-100 rounded-full p-3">
-                            <i class="fas fa-coins text-purple-600 text-xl"></i>
-                        </div>
-                    </div>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Login Warga</h2>
+                <p class="text-gray-600 mt-2">Masuk menggunakan NIK dan password Anda</p>
             </div>
-        </section>
-
-        <!-- Charts Section -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Pemasukan vs Pengeluaran Chart -->
-            <div class="bg-white rounded-lg shadow p-6 fade-in">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Grafik Pemasukan vs Pengeluaran</h3>
-                <div class="chart-container">
-                    <canvas id="incomeExpenseChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Pembagian Anggaran Chart -->
-            <div class="bg-white rounded-lg shadow p-6 fade-in">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Pembagian Anggaran per Sektor</h3>
-                <div class="chart-container">
-                    <canvas id="budgetAllocationChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- Transaction Table -->
-        <section class="bg-white rounded-lg shadow mb-8 fade-in">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">Transaksi Terbaru</h3>
-                    <div class="flex space-x-2">
-                        <button class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm">
-                            <i class="fas fa-plus mr-1"></i> Tambah Transaksi
-                        </button>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm">
-                            <i class="fas fa-download mr-1"></i> Export
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15 Nov 2024</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    Infrastruktur
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">Pembangunan Jalan Desa</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-red-600 font-medium">Pengeluaran</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 50.000.000</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Selesai
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
-                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">12 Nov 2024</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    PAD
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">Pajak Bumi dan Bangunan</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-green-600 font-medium">Pemasukan</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 25.000.000</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Selesai
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
-                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10 Nov 2024</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                                    Pendidikan
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-900">Bantuan Beasiswa Siswa</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-red-600 font-medium">Pengeluaran</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 15.000.000</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Proses
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button class="text-blue-600 hover:text-blue-900 mr-3">Detail</button>
-                                <button class="text-gray-600 hover:text-gray-900">Edit</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- Document Section -->
-        <section class="mb-8 fade-in">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Dokumen Laporan Keuangan</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-file-pdf text-red-500 text-3xl"></i>
-                        <span class="text-xs text-gray-500">2.5 MB</span>
-                    </div>
-                    <h4 class="font-medium text-gray-900 mb-2">Laporan Keuangan Triwulan III</h4>
-                    <p class="text-sm text-gray-600 mb-3">Laporan realisasi anggaran periode Juli-September 2024</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Diupload 5 Nov 2024</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-file-excel text-green-500 text-3xl"></i>
-                        <span class="text-xs text-gray-500">1.2 MB</span>
-                    </div>
-                    <h4 class="font-medium text-gray-900 mb-2">Data Transaksi Oktober 2024</h4>
-                    <p class="text-sm text-gray-600 mb-3">Rekapitulasi semua transaksi bulan Oktober</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Diupload 1 Nov 2024</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                    <div class="flex items-center justify-between mb-4">
-                        <i class="fas fa-file-word text-blue-500 text-3xl"></i>
-                        <span class="text-xs text-gray-500">856 KB</span>
-                    </div>
-                    <h4 class="font-medium text-gray-900 mb-2">Rencana Anggaran 2025</h4>
-                    <p class="text-sm text-gray-600 mb-3">Usulan rencana kerja dan anggaran tahun 2025</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">Diupload 28 Okt 2024</span>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Transparency Info -->
-        <section class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 fade-in">
-            <div class="flex items-start">
-                <i class="fas fa-shield-alt text-green-600 text-2xl mr-4 mt-1"></i>
+            <form id="citizen-login-form" class="space-y-6">
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Komitmen Transparansi</h3>
-                    <p class="text-gray-700 mb-3">
-                        Desa Mulyajaya berkomitmen untuk mengelola keuangan secara transparan dan akuntabel. 
-                        Setiap rupiah dana desa dapat dipertanggungjawabkan kepada masyarakat.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
-                            <i class="fas fa-check text-green-600 mr-1"></i> Real-time Update
-                        </span>
-                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
-                            <i class="fas fa-check text-green-600 mr-1"></i> Audit Berkala
-                        </span>
-                        <span class="px-3 py-1 bg-white rounded-full text-sm text-gray-700">
-                            <i class="fas fa-check text-green-600 mr-1"></i> Publik Terbuka
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h4 class="text-lg font-semibold mb-4">Tentang Siskeudes</h4>
-                    <p class="text-gray-400 text-sm">
-                        Sistem informasi keuangan desa yang dirancang untuk meningkatkan transparansi 
-                        dan akuntabilitas pengelolaan dana desa.
-                    </p>
+                    <label for="citizen-nik" class="block text-sm font-medium text-gray-700 mb-1">NIK</label>
+                    <input
+                        type="text"
+                        id="citizen-nik"
+                        name="nik"
+                        placeholder="Masukkan NIK Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
                 </div>
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Kontak</h4>
-                    <p class="text-gray-400 text-sm mb-2">
-                        <i class="fas fa-map-marker-alt mr-2"></i>Kantor Desa Mulyajaya
-                    </p>
-                    <p class="text-gray-400 text-sm mb-2">
-                        <i class="fas fa-phone mr-2"></i>(0274) 123456
-                    </p>
-                    <p class="text-gray-400 text-sm">
-                        <i class="fas fa-envelope mr-2"></i>info@desamulyajaya.go.id
-                    </p>
+                    <label for="citizen-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input
+                        type="password"
+                        id="citizen-password"
+                        name="password"
+                        placeholder="Masukkan password Anda"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    />
                 </div>
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Link Terkait</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Website Resmi Desa</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Kementerian Desa</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Lapor.go.id</a></li>
-                    </ul>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Login
+                    </button>
                 </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; 2024 Siskeudes Desa Mulyajaya. All rights reserved.</p>
+            </form>
+            <div class="mt-6 text-center">
+                <p id="citizen-login-error" class="text-sm text-red-500 hidden">
+                    NIK atau password tidak valid.
+                </p>
+                <p class="text-sm text-gray-600 mt-4">
+                    Belum punya akun?
+                    <button id="go-to-register-btn" class="text-blue-600 hover:text-blue-800 font-medium">
+                        Daftar di sini
+                    </button>
+                </p>
+                <button id="back-to-landing-btn" class="mt-4 text-gray-600 hover:text-gray-800 font-medium">
+                    Kembali ke Halaman Utama
+                </button>
             </div>
         </div>
-    </footer>
-
+    </div>
+    
+    <!-- Citizen Dashboard Page -->
+    <div id="citizen-dashboard-page" class="hidden min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">SIAPDes</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-800" id="citizen-welcome-name">Selamat datang,</p>
+                        <p class="text-xs text-gray-600" id="citizen-welcome-nik">NIK: </p>
+                    </div>
+                    <div class="relative">
+                        <button id="notification-btn" class="p-2 text-gray-600 hover:text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538.214 1.055.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </button>
+                        <span id="unread-requests-badge" class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    </div>
+                    <button id="citizen-logout-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Warga</h1>
+                <p class="text-gray-600">Selamat datang di sistem pengajuan surat online Desa Makmur Jaya</p>
+            </div>
+            
+            <!-- Dashboard Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Total Pengajuan</p>
+                            <p class="text-2xl font-bold text-gray-800" id="total-requests">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Menunggu Verifikasi</p>
+                            <p class="text-2xl font-bold text-gray-800" id="pending-requests">0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mr-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Selesai</p>
+                            <p class="text-2xl font-bold text-gray-800" id="completed-requests">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Aksi Cepat</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button id="new-request-btn" class="flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Ajukan Surat Baru
+                    </button>
+                    <button id="view-requests-btn" class="flex items-center justify-center px-6 py-4 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Lihat Riwayat Pengajuan
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Requests -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Pengajuan Terbaru</h2>
+                <div id="recent-requests-container">
+                    <div class="text-center py-8 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Belum ada pengajuan surat</p>
+                        <p class="text-sm mt-1">Klik tombol "Ajukan Surat Baru" untuk membuat pengajuan pertama Anda</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Citizen Request Page -->
+    <div id="citizen-request-page" class="hidden min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">SIAPDes</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-800" id="citizen-welcome-name-request">Selamat datang,</p>
+                        <p class="text-xs text-gray-600" id="citizen-welcome-nik-request">NIK: </p>
+                    </div>
+                    <button id="citizen-logout-btn-request" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Pengajuan Surat</h1>
+                <p class="text-gray-600">Ajukan surat yang Anda butuhkan dengan mengisi formulir di bawah ini</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+                <form id="citizen-request-form" class="space-y-6">
+                    <div>
+                        <label for="letter-type" class="block text-sm font-medium text-gray-700 mb-1">Jenis Surat</label>
+                        <select
+                            id="letter-type"
+                            name="letterType"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        >
+                            <option value="">-- Pilih Jenis Surat --</option>
+                            <option value="skm">Surat Keterangan Miskin</option>
+                            <option value="sku">Surat Keterangan Usaha</option>
+                            <option value="skd">Surat Keterangan Domisili</option>
+                            <option value="skp">Surat Keterangan Pengantar</option>
+                            <option value="skck">Surat Pengantar SKCK</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="letter-purpose" class="block text-sm font-medium text-gray-700 mb-1">Keperluan</label>
+                        <textarea
+                            id="letter-purpose"
+                            name="purpose"
+                            rows="3"
+                            placeholder="Jelaskan keperluan pembuatan surat"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        ></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="letter-additional-info" class="block text-sm font-medium text-gray-700 mb-1">Informasi Tambahan (Opsional)</label>
+                        <textarea
+                            id="letter-additional-info"
+                            name="additionalInfo"
+                            rows="2"
+                            placeholder="Informasi tambahan yang perlu dicantumkan dalam surat"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        ></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="letter-file" class="block text-sm font-medium text-gray-700 mb-1">Dokumen Pendukung (Opsional)</label>
+                        <div class="flex items-center justify-center w-full">
+                            <label for="letter-file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p class="text-sm text-gray-500">
+                                        <span class="font-semibold">Klik untuk upload</span> atau drag and drop
+                                    </p>
+                                    <p class="text-xs text-gray-500">PDF, JPG, PNG (max. 2MB)</p>
+                                </div>
+                                <input id="letter-file" name="file" type="file" class="hidden" />
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button
+                            type="submit"
+                            class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Ajukan Surat
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Citizen Requests History Page -->
+    <div id="citizen-requests-history-page" class="hidden min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-gray-800">SIAPDes</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-800" id="citizen-welcome-name-history">Selamat datang,</p>
+                        <p class="text-xs text-gray-600" id="citizen-welcome-nik-history">NIK: </p>
+                    </div>
+                    <button id="citizen-logout-btn-history" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Riwayat Pengajuan Surat</h1>
+                    <p class="text-gray-600">Lihat semua pengajuan surat yang telah Anda buat</p>
+                </div>
+                <button id="back-to-dashboard-btn" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+                    Kembali ke Dashboard
+                </button>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div id="citizen-requests-container">
+                    <div class="text-center py-8 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Belum ada pengajuan surat</p>
+                        <p class="text-sm mt-1">Ajukan surat pertama Anda menggunakan tombol "Ajukan Surat Baru"</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Letter Print Preview Modal -->
+    <div id="letter-preview-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800">Pratinjau Surat</h2>
+                <button id="close-letter-preview" class="text-gray-500 hover:text-gray-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="print-content" class="p-8 bg-white">
+                <!-- Letter content will be inserted here -->
+            </div>
+            <div class="p-6 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="download-letter-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Unduh PDF
+                </button>
+                <button id="print-letter-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak Surat
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
-        // Chart.js Configuration
-        const ctx1 = document.getElementById('incomeExpenseChart').getContext('2d');
-        const incomeExpenseChart = new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov'],
-                datasets: [{
-                    label: 'Pemasukan',
-                    data: [150, 180, 200, 170, 220, 250, 180, 200, 150, 180, 200],
-                    borderColor: 'rgb(34, 197, 94)',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    tension: 0.4
-                }, {
-                    label: 'Pengeluaran',
-                    data: [100, 120, 150, 130, 160, 180, 140, 160, 120, 150, 120],
-                    borderColor: 'rgb(239, 68, 68)',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    tension: 0.4
-                }]
+        // Data untuk menyimpan pengajuan surat dari warga
+        let citizenRequestsData = [];
+        
+        // Data warga yang sedang login
+        let currentCitizen = null;
+        
+        // Data penduduk (simulasi)
+        const populationData = [
+            {
+                id: 1,
+                nik: "3204012345670001",
+                nama: "Asep Sunandar",
+                ttl: "1980-05-15",
+                gender: "Laki-laki",
+                address: "Kp. Ciharum RT 01/RW 02",
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
+            {
+                id: 2,
+                nik: "3204016543210002",
+                nama: "Mimin Mintarsih",
+                ttl: "1982-11-20",
+                gender: "Perempuan",
+                address: "Kp. Ciharum RT 01/RW 02",
+            },
+            {
+                id: 3,
+                nik: "3204011010100003",
+                nama: "Ujang Kastaman",
+                ttl: "1975-01-30",
+                gender: "Laki-laki",
+                address: "Kp. Bojong Koneng RT 03/RW 01",
+            },
+        ];
+        
+        // Data warga terdaftar (disimpan di localStorage)
+        let registeredCitizens = JSON.parse(localStorage.getItem('registeredCitizens')) || [];
+        
+        // Variabel untuk pengecekan status
+        let statusCheckInterval = null;
+        
+        // DOM Elements
+        const citizenLandingPage = document.getElementById('citizen-landing-page');
+        const citizenRegisterPage = document.getElementById('citizen-register-page');
+        const citizenLoginPage = document.getElementById('citizen-login-page');
+        const citizenDashboardPage = document.getElementById('citizen-dashboard-page');
+        const citizenRequestPage = document.getElementById('citizen-request-page');
+        const citizenRequestsHistoryPage = document.getElementById('citizen-requests-history-page');
+        const letterPreviewModal = document.getElementById('letter-preview-modal');
+        const printContent = document.getElementById('print-content');
+        
+        const citizenLoginBtn = document.getElementById('citizen-login-btn');
+        const citizenRegisterBtn = document.getElementById('citizen-register-btn-cta');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const backToLandingBtn = document.getElementById('back-to-landing-btn');
+        const backToLandingFromRegister = document.getElementById('back-to-landing-from-register');
+        const goToRegisterBtn = document.getElementById('go-to-register-btn');
+        const goToLoginBtn = document.getElementById('go-to-login-btn');
+        const citizenLogoutBtn = document.getElementById('citizen-logout-btn');
+        const citizenLogoutBtnRequest = document.getElementById('citizen-logout-btn-request');
+        const citizenLogoutBtnHistory = document.getElementById('citizen-logout-btn-history');
+        const newRequestBtn = document.getElementById('new-request-btn');
+        const viewRequestsBtn = document.getElementById('view-requests-btn');
+        const backToDashboardBtn = document.getElementById('back-to-dashboard-btn');
+        const notificationBtn = document.getElementById('notification-btn');
+        const closeLetterPreview = document.getElementById('close-letter-preview');
+        const printLetterBtn = document.getElementById('print-letter-btn');
+        const downloadLetterBtn = document.getElementById('download-letter-btn');
+        
+        const citizenRegisterForm = document.getElementById('citizen-register-form');
+        const citizenRegisterError = document.getElementById('citizen-register-error');
+        const citizenLoginForm = document.getElementById('citizen-login-form');
+        const citizenLoginError = document.getElementById('citizen-login-error');
+        const citizenRequestForm = document.getElementById('citizen-request-form');
+        const citizenRequestsContainer = document.getElementById('citizen-requests-container');
+        const recentRequestsContainer = document.getElementById('recent-requests-container');
+        
+        const citizenWelcomeName = document.getElementById('citizen-welcome-name');
+        const citizenWelcomeNik = document.getElementById('citizen-welcome-nik');
+        const citizenWelcomeNameRequest = document.getElementById('citizen-welcome-name-request');
+        const citizenWelcomeNikRequest = document.getElementById('citizen-welcome-nik-request');
+        const citizenWelcomeNameHistory = document.getElementById('citizen-welcome-name-history');
+        const citizenWelcomeNikHistory = document.getElementById('citizen-welcome-nik-history');
+        
+        // Fungsi untuk menyimpan dan memuat data dari localStorage
+        function saveCitizenRequestsToStorage() {
+            localStorage.setItem('citizenRequests', JSON.stringify(citizenRequestsData));
+        }
+        
+        function loadCitizenRequestsFromStorage() {
+            const data = localStorage.getItem('citizenRequests');
+            if (data) {
+                citizenRequestsData = JSON.parse(data);
+            }
+        }
+        
+        // Fungsi untuk menampilkan/menyembunyikan loading
+        function showLoading(container) {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading-container';
+            loadingDiv.innerHTML = '<div class="loading-indicator"></div>';
+            container.innerHTML = '';
+            container.appendChild(loadingDiv);
+        }
+        
+        // Fungsi untuk menampilkan toast notification
+        function showToast(message, isError = false, duration = 3000) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed top-5 right-5 ${isError ? 'bg-red-500' : 'bg-green-500'} text-white py-3 px-6 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Hide toast after specified duration
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
                     }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rp ' + value + 'jt';
-                            }
-                        }
+                }, 300);
+            }, duration);
+        }
+        
+        // Fungsi untuk memulai pengecekan status
+        function startStatusCheck() {
+            // Hentikan interval yang sudah ada sebelumnya
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+            }
+            
+            // Mulai interval baru
+            statusCheckInterval = setInterval(() => {
+                if (!citizenRequestsHistoryPage.classList.contains('hidden') && currentCitizen) {
+                    loadCitizenRequestsFromStorage();
+                    loadCitizenRequests();
+                }
+            }, 5000); // Cek setiap 5 detik
+        }
+        
+        // Fungsi untuk menghentikan pengecekan status
+        function stopStatusCheck() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+                statusCheckInterval = null;
+            }
+        }
+        
+        // Fungsi untuk memperbarui status permohonan
+        function updateRequestStatus(requestId, newStatus) {
+            const requestIndex = citizenRequestsData.findIndex(r => r.id == requestId);
+            if (requestIndex !== -1) {
+                const oldStatus = citizenRequestsData[requestIndex].status;
+                citizenRequestsData[requestIndex].status = newStatus;
+                saveCitizenRequestsToStorage();
+                
+                // Tampilkan notifikasi jika pengguna masih di halaman yang sama
+                if (currentCitizen && citizenRequestsData[requestIndex].citizenId === currentCitizen.id) {
+                    const letterTypeText = {
+                        'skm': 'Surat Keterangan Miskin',
+                        'sku': 'Surat Keterangan Usaha',
+                        'skd': 'Surat Keterangan Domisili',
+                        'skp': 'Surat Keterangan Pengantar',
+                        'skck': 'Surat Pengantar SKCK'
+                    }[citizenRequestsData[requestIndex].letterType] || citizenRequestsData[requestIndex].letterType;
+                    
+                    let message = `Status permohonan ${letterTypeText} Anda telah berubah dari "${oldStatus}" menjadi "${newStatus}"`;
+                    
+                    // Tambahkan pesan khusus untuk status tertentu
+                    if (newStatus === 'Disetujui') {
+                        message += '. Surat Anda siap diambil di kantor desa.';
+                    } else if (newStatus === 'Ditolak') {
+                        message += '. Silakan hubungi kantor desa untuk informasi lebih lanjut.';
+                    }
+                    
+                    showToast(message, false, 5000); // Tampilkan selama 5 detik
+                    
+                    // Perbarui tampilan jika di halaman dashboard atau riwayat
+                    if (!citizenDashboardPage.classList.contains('hidden')) {
+                        updateDashboardStats();
+                        loadRecentRequests();
+                    } else if (!citizenRequestsHistoryPage.classList.contains('hidden')) {
+                        loadCitizenRequests();
                     }
                 }
             }
-        });
-
-        const ctx2 = document.getElementById('budgetAllocationChart').getContext('2d');
-        const budgetAllocationChart = new Chart(ctx2, {
-            type: 'doughnut',
-            data: {
-                labels: ['Infrastruktur', 'Pendidikan', 'Kesehatan', 'Pemberdayaan', 'Administrasi'],
-                datasets: [{
-                    data: [35, 25, 20, 15, 5],
-                    backgroundColor: [
-                        'rgb(59, 130, 246)',
-                        'rgb(168, 85, 247)',
-                        'rgb(34, 197, 94)',
-                        'rgb(251, 146, 60)',
-                        'rgb(156, 163, 175)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
+        }
+        
+        // Fungsi untuk membuat format tanggal Indonesia
+        function formatIndonesianDate(dateString) {
+            const date = new Date(dateString);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+        
+        // Fungsi untuk membuat template surat
+        function generateLetterTemplate(request) {
+            const letterTypeText = {
+                'skm': 'Surat Keterangan Miskin',
+                'sku': 'Surat Keterangan Usaha',
+                'skd': 'Surat Keterangan Domisili',
+                'skp': 'Surat Keterangan Pengantar',
+                'skck': 'Surat Pengantar SKCK'
+            }[request.letterType] || request.letterType;
+            
+            // Generate nomor surat
+            const letterNumber = `001/SKD/${new Date().getFullYear()}`;
+            
+            // Format tanggal
+            const currentDate = formatIndonesianDate(new Date());
+            
+            // Template HTML untuk surat
+            let letterContent = `
+                <div class="letter-container p-8" style="font-family: 'Times New Roman', serif;">
+                    <!-- Kop Surat -->
+                    <div class="text-center mb-6">
+                        <h1 class="text-xl font-bold mb-1">PEMERINTAH KABUPATEN BANDUNG</h1>
+                        <h2 class="text-lg font-bold mb-1">DESA MAKMUR JAYA</h2>
+                        <h3 class="text-md font-bold mb-1">KECAMATAN CIPTA KARYA</h3>
+                        <div class="border-t-2 border-black my-2"></div>
+                        <p class="text-sm">Jl. Desa Makmur Jaya No. 123 Kode Pos 40375</p>
+                    </div>
+                    
+                    <!-- Nomor Surat -->
+                    <div class="flex justify-between mb-4">
+                        <div></div>
+                        <div class="text-right">
+                            <p class="font-semibold">Nomor : ${letterNumber}</p>
+                            <p class="font-semibold">Tanggal : ${currentDate}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Perihal -->
+                    <div class="mb-4">
+                        <p class="font-semibold">Perihal : ${letterTypeText}</p>
+                    </div>
+                    
+                    <!-- Isi Surat -->
+                    <div class="mb-6">
+                        <p class="mb-4">Yang bertanda tangan di bawah ini Kepala Desa Makmur Jaya Kecamatan Cipta Karya Kabupaten Bandung, menerangkan bahwa:</p>
+                        
+                        <table class="mb-4" style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 150px; padding: 4px;">Nama</td>
+                                <td style="padding: 4px;">: ${request.citizenName}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">NIK</td>
+                                <td style="padding: 4px;">: ${request.citizenNik}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">Tempat/Tgl Lahir</td>
+                                <td style="padding: 4px;">: ${request.birthPlace || '-'}, ${request.birthDate || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">Jenis Kelamin</td>
+                                <td style="padding: 4px;">: ${request.gender || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">Pekerjaan</td>
+                                <td style="padding: 4px;">: ${request.occupation || '-'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px;">Alamat</td>
+                                <td style="padding: 4px;">: ${request.address || '-'}</td>
+                            </tr>
+                        </table>
+                        
+                        <p class="mb-4">Adalah benar warga Desa Makmur Jaya Kecamatan Cipta Karya Kabupaten Bandung dan pada saat ini dalam keadaan:</p>
+                        
+                        <p class="mb-4" style="text-align: justify; text-indent: 40px;">${request.purpose}</p>
+                        
+                        ${request.additionalInfo ? `<p class="mb-4" style="text-align: justify; text-indent: 40px;">${request.additionalInfo}</p>` : ''}
+                        
+                        <p class="mb-4">Demikian surat keterangan ini dibuat agar dapat dipergunakan sebagaimana mestinya.</p>
+                    </div>
+                    
+                    <!-- Tanda Tangan -->
+                    <div class="flex justify-between mt-10">
+                        <div>
+                            <p class="mb-8">Mengetahui,</p>
+                            <p class="font-semibold">CAMAT CIPTA KARYA</p>
+                            <p class="mb-16">(Tanda Tangan)</p>
+                            <p class="font-semibold underline">Drs. H. ABDUL MALIK, M.Si</p>
+                            <p>NIP. 19650128 199303 1 001</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="mb-8">Makmur Jaya, ${currentDate}</p>
+                            <p class="font-semibold">KEPALA DESA MAKMUR JAYA</p>
+                            <p class="mb-16">(Tanda Tangan)</p>
+                            <p class="font-semibold underline">H. USEP SUNANDAR, S.IP</p>
+                            <p>NIP. 19700515 200501 1 001</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return letterContent;
+        }
+        
+        // Fungsi untuk menampilkan pratinjau surat
+        function showLetterPreview(requestId) {
+            const request = citizenRequestsData.find(r => r.id === requestId);
+            if (!request) return;
+            
+            // Generate letter content
+            const letterContent = generateLetterTemplate(request);
+            
+            // Set content to print area
+            printContent.innerHTML = letterContent;
+            
+            // Show modal
+            letterPreviewModal.classList.remove('hidden');
+            
+            // Set up print button
+            printLetterBtn.onclick = function() {
+                window.print();
+            };
+            
+            // Set up download button
+            downloadLetterBtn.onclick = function() {
+                downloadLetterAsPDF(requestId);
+            };
+        }
+        
+        // Fungsi untuk mengunduh surat sebagai PDF
+        function downloadLetterAsPDF(requestId) {
+            const request = citizenRequestsData.find(r => r.id === requestId);
+            if (!request) return;
+            
+            const letterTypeText = {
+                'skm': 'Surat Keterangan Miskin',
+                'sku': 'Surat Keterangan Usaha',
+                'skd': 'Surat Keterangan Domisili',
+                'skp': 'Surat Keterangan Pengantar',
+                'skck': 'Surat Pengantar SKCK'
+            }[request.letterType] || request.letterType;
+            
+            const fileName = `${letterTypeText}_${request.citizenName}_${request.id}`;
+            
+            // Create a new jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            
+            // Get the HTML content
+            const element = printContent;
+            
+            // Use html2canvas to capture the HTML content
+            html2canvas(element, {
+                scale: 2,
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                // Add the first page
+                doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Add additional pages if needed
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
                 }
-            }
-        });
-
-        // Add animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in');
-                }
+                
+                // Save the PDF
+                doc.save(`${fileName}.pdf`);
+                showToast('Surat berhasil diunduh sebagai PDF');
             });
-        }, observerOptions);
-
-        document.querySelectorAll('section').forEach(section => {
-            observer.observe(section);
+        }
+        
+        // Event Listeners
+        citizenLoginBtn.addEventListener('click', () => {
+            citizenLandingPage.classList.add('hidden');
+            citizenLoginPage.classList.remove('hidden');
         });
+        
+        citizenRegisterBtn.addEventListener('click', () => {
+            citizenLandingPage.classList.add('hidden');
+            citizenRegisterPage.classList.remove('hidden');
+        });
+        
+        adminLoginBtn.addEventListener('click', () => {
+            window.location.href = 'mockup_desa.html';
+        });
+        
+        backToLandingBtn.addEventListener('click', () => {
+            citizenLoginPage.classList.add('hidden');
+            citizenLandingPage.classList.remove('hidden');
+        });
+        
+        backToLandingFromRegister.addEventListener('click', () => {
+            citizenRegisterPage.classList.add('hidden');
+            citizenLandingPage.classList.remove('hidden');
+        });
+        
+        goToRegisterBtn.addEventListener('click', () => {
+            citizenLoginPage.classList.add('hidden');
+            citizenRegisterPage.classList.remove('hidden');
+        });
+        
+        goToLoginBtn.addEventListener('click', () => {
+            citizenRegisterPage.classList.add('hidden');
+            citizenLoginPage.classList.remove('hidden');
+        });
+        
+        citizenLogoutBtn.addEventListener('click', () => {
+            currentCitizen = null;
+            citizenDashboardPage.classList.add('hidden');
+            citizenLandingPage.classList.remove('hidden');
+        });
+        
+        citizenLogoutBtnRequest.addEventListener('click', () => {
+            currentCitizen = null;
+            citizenRequestPage.classList.add('hidden');
+            citizenLandingPage.classList.remove('hidden');
+        });
+        
+        citizenLogoutBtnHistory.addEventListener('click', () => {
+            currentCitizen = null;
+            citizenRequestsHistoryPage.classList.add('hidden');
+            citizenLandingPage.classList.remove('hidden');
+            stopStatusCheck();
+        });
+        
+        newRequestBtn.addEventListener('click', () => {
+            citizenDashboardPage.classList.add('hidden');
+            citizenRequestPage.classList.remove('hidden');
+            
+            // Update welcome info
+            if (currentCitizen) {
+                citizenWelcomeNameRequest.textContent = `Selamat datang, ${currentCitizen.nama}`;
+                citizenWelcomeNikRequest.textContent = `NIK: ${currentCitizen.nik}`;
+            }
+        });
+        
+        viewRequestsBtn.addEventListener('click', () => {
+            citizenDashboardPage.classList.add('hidden');
+            citizenRequestsHistoryPage.classList.remove('hidden');
+            
+            // Update welcome info
+            if (currentCitizen) {
+                citizenWelcomeNameHistory.textContent = `Selamat datang, ${currentCitizen.nama}`;
+                citizenWelcomeNikHistory.textContent = `NIK: ${currentCitizen.nik}`;
+            }
+            
+            // Load citizen requests
+            loadCitizenRequests();
+            
+            // Mulai pengecekan status
+            startStatusCheck();
+        });
+        
+        notificationBtn.addEventListener('click', () => {
+            citizenDashboardPage.classList.add('hidden');
+            citizenRequestsHistoryPage.classList.remove('hidden');
+            
+            // Update welcome info
+            if (currentCitizen) {
+                citizenWelcomeNameHistory.textContent = `Selamat datang, ${currentCitizen.nama}`;
+                citizenWelcomeNikHistory.textContent = `NIK: ${currentCitizen.nik}`;
+            }
+            
+            // Load citizen requests
+            loadCitizenRequests();
+            
+            // Mulai pengecekan status
+            startStatusCheck();
+        });
+        
+        backToDashboardBtn.addEventListener('click', () => {
+            citizenRequestsHistoryPage.classList.add('hidden');
+            citizenDashboardPage.classList.remove('hidden');
+            
+            // Update dashboard stats
+            updateDashboardStats();
+            
+            // Hentikan pengecekan status
+            stopStatusCheck();
+        });
+        
+        closeLetterPreview.addEventListener('click', () => {
+            letterPreviewModal.classList.add('hidden');
+        });
+        
+        citizenRegisterForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            citizenRegisterError.classList.add('hidden');
+            
+            const nik = e.target.nik.value;
+            const name = e.target.name.value;
+            const email = e.target.email.value;
+            const phone = e.target.phone.value;
+            const address = e.target.address.value;
+            const password = e.target.password.value;
+            const confirmPassword = e.target.confirmPassword.value;
+            
+            // Validasi password
+            if (password !== confirmPassword) {
+                citizenRegisterError.textContent = 'Password dan konfirmasi password tidak cocok.';
+                citizenRegisterError.classList.remove('hidden');
+                return;
+            }
+            
+            // Cek apakah NIK sudah terdaftar
+            const existingCitizen = registeredCitizens.find(c => c.nik === nik);
+            if (existingCitizen) {
+                citizenRegisterError.textContent = 'NIK sudah terdaftar. Gunakan NIK lain atau login dengan akun yang sudah ada.';
+                citizenRegisterError.classList.remove('hidden');
+                return;
+            }
+            
+            // Buat objek warga baru
+            const newCitizen = {
+                id: Date.now(),
+                nik: nik,
+                nama: name,
+                email: email,
+                phone: phone,
+                address: address,
+                password: password, // Di aplikasi sungguhan, password harus dienkripsi
+                registrationDate: new Date().toISOString().split('T')[0]
+            };
+            
+            // Simpan ke array dan localStorage
+            registeredCitizens.push(newCitizen);
+            localStorage.setItem('registeredCitizens', JSON.stringify(registeredCitizens));
+            
+            // Reset form
+            citizenRegisterForm.reset();
+            
+            // Tampilkan pesan sukses
+            showToast('Pendaftaran berhasil! Silakan login dengan NIK dan password Anda.');
+            
+            // Arahkan ke halaman login
+            setTimeout(() => {
+                citizenRegisterPage.classList.add('hidden');
+                citizenLoginPage.classList.remove('hidden');
+            }, 1500);
+        });
+        
+        citizenLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            citizenLoginError.classList.add('hidden');
+            
+            const nik = e.target.nik.value;
+            const password = e.target.password.value;
+            
+            // Cek di data penduduk (hardcoded) untuk demo
+            let citizen = populationData.find(p => p.nik === nik);
+            
+            // Jika tidak ditemukan di data penduduk, cek di data terdaftar
+            if (!citizen) {
+                citizen = registeredCitizens.find(c => c.nik === nik && c.password === password);
+            }
+            
+            if (citizen) {
+                currentCitizen = citizen;
+                
+                // Update welcome info
+                citizenWelcomeName.textContent = `Selamat datang, ${citizen.nama}`;
+                citizenWelcomeNik.textContent = `NIK: ${citizen.nik}`;
+                
+                citizenLoginPage.classList.add('hidden');
+                citizenDashboardPage.classList.remove('hidden');
+                
+                // Update dashboard stats
+                updateDashboardStats();
+                
+                // Load recent requests
+                loadRecentRequests();
+            } else {
+                citizenLoginError.classList.remove('hidden');
+            }
+        });
+        
+        citizenRequestForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const letterType = e.target.letterType.value;
+            const purpose = e.target.purpose.value;
+            const additionalInfo = e.target.additionalInfo.value;
+            
+            // Create new request
+            const newRequest = {
+                id: Date.now(),
+                citizenId: currentCitizen.id,
+                citizenName: currentCitizen.nama,
+                citizenNik: currentCitizen.nik,
+                letterType: letterType,
+                purpose: purpose,
+                additionalInfo: additionalInfo,
+                status: 'Menunggu Verifikasi',
+                submissionDate: new Date().toISOString().split('T')[0],
+                file: null, // In a real app, this would handle file uploads
+                isRead: false, // Tandai sebagai belum dibaca
+                // Tambahkan data tambahan untuk surat
+                birthPlace: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[0] : '',
+                birthDate: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[1] : '',
+                gender: currentCitizen.gender || '',
+                occupation: currentCitizen.pekerjaan || '',
+                address: currentCitizen.address || ''
+            };
+            
+            citizenRequestsData.push(newRequest);
+            
+            // Simpan ke localStorage
+            saveCitizenRequestsToStorage();
+            
+            // Reset form
+            citizenRequestForm.reset();
+            
+            // Show success message
+            showToast('Pengajuan surat berhasil dikirim!');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+                citizenRequestPage.classList.add('hidden');
+                citizenDashboardPage.classList.remove('hidden');
+                
+                // Update dashboard stats
+                updateDashboardStats();
+                
+                // Load recent requests
+                loadRecentRequests();
+            }, 1500);
+        });
+        
+        function updateDashboardStats() {
+            if (!currentCitizen) return;
+            
+            // Muat data dari localStorage terlebih dahulu
+            loadCitizenRequestsFromStorage();
+            
+            const citizenRequests = citizenRequestsData.filter(r => r.citizenId === currentCitizen.id);
+            const pendingRequests = citizenRequests.filter(r => r.status === 'Menunggu Verifikasi');
+            const completedRequests = citizenRequests.filter(r => r.status === 'Disetujui');
+            const unreadRequests = citizenRequests.filter(r => !r.isRead);
+            
+            document.getElementById('total-requests').textContent = citizenRequests.length;
+            document.getElementById('pending-requests').textContent = pendingRequests.length;
+            document.getElementById('completed-requests').textContent = completedRequests.length;
+            
+            // Tambahkan badge untuk permohonan yang belum dibaca
+            const unreadBadge = document.getElementById('unread-requests-badge');
+            if (unreadBadge) {
+                if (unreadRequests.length > 0) {
+                    unreadBadge.textContent = unreadRequests.length;
+                    unreadBadge.classList.remove('hidden');
+                } else {
+                    unreadBadge.classList.add('hidden');
+                }
+            }
+        }
+        
+        function loadRecentRequests() {
+            if (!currentCitizen) return;
+            
+            // Muat data dari localStorage terlebih dahulu
+            loadCitizenRequestsFromStorage();
+            
+            const citizenRequests = citizenRequestsData
+                .filter(r => r.citizenId === currentCitizen.id)
+                .sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate))
+                .slice(0, 3); // Only show 3 most recent requests
+            
+            if (citizenRequests.length === 0) {
+                recentRequestsContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p>Belum ada pengajuan surat</p>
+                        <p class="text-sm mt-1">Klik tombol "Ajukan Surat Baru" untuk membuat pengajuan pertama Anda</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const statusMap = {
+                'Menunggu Verifikasi': { color: 'text-yellow-600', bg: 'bg-yellow-100' },
+                'Diproses': { color: 'text-blue-600', bg: 'bg-blue-100' },
+                'Disetujui': { color: 'text-green-600', bg: 'bg-green-100' },
+                'Ditolak': { color: 'text-red-600', bg: 'bg-red-100' }
+            };
+            
+            const requestsHtml = citizenRequests.map(request => {
+                const status = statusMap[request.status] || statusMap['Menunggu Verifikasi'];
+                const letterTypeText = {
+                    'skm': 'Surat Keterangan Miskin',
+                    'sku': 'Surat Keterangan Usaha',
+                    'skd': 'Surat Keterangan Domisili',
+                    'skp': 'Surat Keterangan Pengantar',
+                    'skck': 'Surat Pengantar SKCK'
+                }[request.letterType] || request.letterType;
+                
+                return `
+                    <div class="border-b border-gray-200 py-4 last:border-0">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium text-gray-800">${letterTypeText}</h3>
+                                <p class="text-sm text-gray-600 mt-1">${request.purpose}</p>
+                                <p class="text-xs text-gray-500 mt-2">Diajukan pada: ${request.submissionDate}</p>
+                            </div>
+                            <span class="px-3 py-1 text-xs font-medium rounded-full ${status.bg} ${status.color}">
+                                ${request.status}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            recentRequestsContainer.innerHTML = `
+                <div class="divide-y divide-gray-200">
+                    ${requestsHtml}
+                </div>
+                <div class="mt-4 text-center">
+                    <button id="view-all-requests-btn" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                        Lihat semua pengajuan
+                    </button>
+                </div>
+            `;
+            
+            // Add event listener to view all requests button
+            document.getElementById('view-all-requests-btn').addEventListener('click', () => {
+                citizenDashboardPage.classList.add('hidden');
+                citizenRequestsHistoryPage.classList.remove('hidden');
+                
+                // Update welcome info
+                if (currentCitizen) {
+                    citizenWelcomeNameHistory.textContent = `Selamat datang, ${currentCitizen.nama}`;
+                    citizenWelcomeNikHistory.textContent = `NIK: ${currentCitizen.nik}`;
+                }
+                
+                // Load citizen requests
+                loadCitizenRequests();
+                
+                // Mulai pengecekan status
+                startStatusCheck();
+            });
+        }
+        
+        function loadCitizenRequests() {
+            if (!currentCitizen) return;
+            
+            // Tampilkan loading
+            showLoading(citizenRequestsContainer);
+            
+            // Muat data dari localStorage terlebih dahulu
+            loadCitizenRequestsFromStorage();
+            
+            const citizenRequests = citizenRequestsData
+                .filter(r => r.citizenId === currentCitizen.id)
+                .sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate));
+            
+            // Tunda sedikit untuk menampilkan loading
+            setTimeout(() => {
+                if (citizenRequests.length === 0) {
+                    citizenRequestsContainer.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p>Belum ada pengajuan surat</p>
+                            <p class="text-sm mt-1">Ajukan surat pertama Anda menggunakan tombol "Ajukan Surat Baru"</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const statusMap = {
+                    'Menunggu Verifikasi': { color: 'text-yellow-600', bg: 'bg-yellow-100' },
+                    'Diproses': { color: 'text-blue-600', bg: 'bg-blue-100' },
+                    'Disetujui': { color: 'text-green-600', bg: 'bg-green-100' },
+                    'Ditolak': { color: 'text-red-600', bg: 'bg-red-100' }
+                };
+                
+                const requestsHtml = citizenRequests.map(request => {
+                    const status = statusMap[request.status] || statusMap['Menunggu Verifikasi'];
+                    const letterTypeText = {
+                        'skm': 'Surat Keterangan Miskin',
+                        'sku': 'Surat Keterangan Usaha',
+                        'skd': 'Surat Keterangan Domisili',
+                        'skp': 'Surat Keterangan Pengantar',
+                        'skck': 'Surat Pengantar SKCK'
+                    }[request.letterType] || request.letterType;
+                    
+                    // Tambahkan tombol cetak/unduh jika statusnya disetujui
+                    let actionButton = '';
+                    if (request.status === 'Disetujui') {
+                        actionButton = `
+                            <button class="print-btn ml-2 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors flex items-center" data-id="${request.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                Cetak
+                            </button>
+                        `;
+                    }
+                    
+                    return `
+                        <div class="border-b border-gray-200 py-4 last:border-0">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-medium text-gray-800">${letterTypeText}</h3>
+                                    <p class="text-sm text-gray-600 mt-1">${request.purpose}</p>
+                                    <p class="text-xs text-gray-500 mt-2">Diajukan pada: ${request.submissionDate}</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="px-3 py-1 text-xs font-medium rounded-full ${status.bg} ${status.color}">
+                                        ${request.status}
+                                    </span>
+                                    ${actionButton}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                citizenRequestsContainer.innerHTML = `
+                    <div class="divide-y divide-gray-200">
+                        ${requestsHtml}
+                    </div>
+                `;
+                
+                // Tambahkan event listener untuk tombol cetak
+                document.querySelectorAll('.print-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const requestId = parseInt(this.getAttribute('data-id'));
+                        showLetterPreview(requestId);
+                    });
+                });
+                
+                // Tandai semua permohonan sebagai sudah dibaca
+                citizenRequests.forEach(request => {
+                    request.isRead = true;
+                });
+                saveCitizenRequestsToStorage();
+                
+                // Perbarui badge notifikasi
+                updateDashboardStats();
+            }, 500);
+        }
+        
+        // Initialize the app
+        function init() {
+            // Show landing page by default
+            citizenLandingPage.classList.remove('hidden');
+            
+            // Muat data dari localStorage saat inisialisasi
+            loadCitizenRequestsFromStorage();
+        }
+        
+        init();
     </script>
 </body>
 </html>

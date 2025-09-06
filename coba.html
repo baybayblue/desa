@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Perusahaan Resmi - TechInnovate Solutions</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+            background: #fff;
+            line-height: 1.5;
+        }
+        
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #0d47a1;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: #f5f5f5;
+            border: 2px solid #0d47a1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #0d47a1;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .company-title {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .company-title h1 {
+            color: #0d47a1;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .company-title .subtitle {
+            color: #555;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .doc-info {
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Company Info Section */
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section-title {
+            color: #0d47a1;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e3f2fd;
+            position: relative;
+        }
+        
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: #0d47a1;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+        }
+        
+        /* Employee Table */
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .employee-table th {
+            background: #0d47a1;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .employee-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .employee-table tr:nth-child(even) {
+            background: #f5f9ff;
+        }
+        
+        .employee-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .page-number {
+            font-weight: 600;
+        }
+        
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120px;
+            color: rgba(13, 71, 161, 0.05);
+            font-weight: 700;
+            z-index: -1;
+            white-space: nowrap;
+        }
+        
+        /* Signature */
+        .signature-section {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-line {
+            border-bottom: 1px solid #333;
+            height: 40px;
+            margin-bottom: 5px;
+        }
+        
+        .signature-title {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                margin: 0;
+                background: white;
+            }
+            
+            .page {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                min-height: auto;
+            }
+            
+            .watermark {
+                display: block;
+            }
+            
+            @page {
+                margin: 20mm;
+                size: A4;
+            }
+            
+            .footer {
+                position: fixed;
+                bottom: 20mm;
+                left: 20mm;
+                right: 20mm;
+            }
+            
+            .employee-table {
+                page-break-inside: avoid;
+            }
+            
+            .employee-table tr {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Watermark -->
+        <div class="watermark">TECHINNOVATE</div>
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                COMPANY<br>LOGO
+            </div>
+            <div class="company-title">
+                <h1>TECHINNOVATE SOLUTIONS</h1>
+                <div class="subtitle">Mewujudkan Ide Digital Anda Menjadi Kenyataan</div>
+            </div>
+            <div class="doc-info">
+                <strong>DOKUMEN RESMI</strong><br>
+                No: DOC/HRD/001/2023<br>
+                <span id="current-date"></span>
+            </div>
+        </div>
+        
+        <!-- Company Information -->
+        <div class="section">
+            <h2 class="section-title">INFORMASI PERUSAHAAN</h2>
+            <div class="info-grid">
+                <div class="info-label">Nama Perusahaan</div>
+                <div class="info-value">PT. TechInnovate Solutions</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">Alamat Perusahaan</div>
+                <div class="info-value">Jl. Digital No. 88, Jakarta Selatan, DKI Jakarta 12345</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">Slogan Perusahaan</div>
+                <div class="info-value">Mewujudkan Ide Digital Anda Menjadi Kenyataan</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">Bidang Usaha</div>
+                <div class="info-value">Jasa Pembuatan Aplikasi dan Pengembangan Software</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">Tahun Berdiri</div>
+                <div class="info-value">2018</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-label">Status Perusahaan</div>
+                <div class="info-value">Perseroan Terbatas (PT)</div>
+            </div>
+        </div>
+        
+        <!-- Employee Directory -->
+        <div class="section">
+            <h2 class="section-title">DAFTAR KARYAWAN</h2>
+            <table class="employee-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Lengkap</th>
+                        <th>Jabatan</th>
+                        <th>Alamat</th>
+                        <th>Nomor Telepon</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Budi Santoso, S.Kom</td>
+                        <td>CEO & Founder</td>
+                        <td>Jl. Executive No. 12, Jakarta Pusat, 10110</td>
+                        <td>0811-1234-5678</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Siti Rahayu, M.TI</td>
+                        <td>CTO</td>
+                        <td>Jl. Teknologi No. 45, Jakarta Barat, 11440</td>
+                        <td>0812-2345-6789</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Ahmad Fauzi, S.Kom</td>
+                        <td>Head of Development</td>
+                        <td>Jl. Programmer No. 33, Tangerang, 15111</td>
+                        <td>0813-3456-7890</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Maya Putri, S.Ds</td>
+                        <td>UI/UX Designer</td>
+                        <td>Jl. Kreatif No. 77, Depok, 16412</td>
+                        <td>0814-4567-8901</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Rizki Pratama, S.Kom</td>
+                        <td>Senior Developer</td>
+                        <td>Jl. Coding No. 21, Bogor, 16115</td>
+                        <td>0815-5678-9012</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Dewi Lestari, S.Kom</td>
+                        <td>Project Manager</td>
+                        <td>Jl. Manajemen No. 55, Bekasi, 17131</td>
+                        <td>0816-6789-0123</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-title">Dibuat oleh,</div>
+                <div style="margin-top: 30px; font-weight: 600;">HRD Department</div>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <div class="signature-title">Disetujui oleh,</div>
+                <div style="margin-top: 30px; font-weight: 600;">Direktur Utama</div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div>PT. TechInnovate Solutions</div>
+            <div class="page-number">Halaman <span class="page-num">1</span></div>
+        </div>
+    </div>
+    
+    <script>
+        // Set current date
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        // Add page numbers (for multi-page documents)
+        window.onload = function() {
+            var pages = document.querySelectorAll('.page');
+            pages.forEach(function(page, index) {
+                var pageNum = page.querySelector('.page-num');
+                if(pageNum) {
+                    pageNum.textContent = index + 1;
+                }
+            });
+        };
+    </script>
+</body>
+</html>
