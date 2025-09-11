@@ -3468,21 +3468,25 @@ function renderAssignmentPage() {
         dashboardContent.innerHTML = content;
         attachPopulationEventListeners();
       }
-      function renderLettersPage() {
-    // 1. Definisikan pemetaan status dan jenis surat
+      
+      // GANTI SELURUH FUNGSI INI
+function renderLettersPage() {
+    // 1. SELALU MUAT DATA TERBARU DARI LOCALSTORAGE DI AWAL
+    loadCitizenRequestsFromStorage();
+
     const statusMap = {
         Selesai: { color: "text-green-600", bg: "bg-green-100" },
         Diproses: { color: "text-blue-600", bg: "bg-blue-100" },
         "Menunggu Verifikasi": { color: "text-amber-600", bg: "bg-amber-100" },
+        "Ditolak": { color: "text-red-600", bg: "bg-red-100" } // Tambahkan status ditolak
     };
     const letterTypeMap = {
         'skm': 'Surat Keterangan Miskin', 'sku': 'Surat Keterangan Usaha', 'skd': 'Surat Keterangan Domisili',
+        'skp': 'Surat Keterangan Pengantar', 'skck': 'Surat Pengantar SKCK'
     };
 
-    // 2. Gabungkan data surat internal dan permohonan warga
     const unifiedLetters = [];
 
-    // Tambahkan surat yang dibuat internal
     lettersData.forEach(letter => {
         unifiedLetters.push({
             id: `internal-${letter.id}`,
@@ -3491,42 +3495,38 @@ function renderAssignmentPage() {
             jenisSurat: letter.type,
             pemohon: letter.applicant,
             status: letter.status,
-            sumber: 'Internal', // Penanda sumber
+            sumber: 'Internal',
             originalId: letter.id
         });
     });
 
-    // Tambahkan surat dari permohonan warga
     citizenRequestsData.forEach(request => {
         unifiedLetters.push({
             id: `request-${request.id}`,
-            noSurat: 'Belum Dibuat',
+            noSurat: request.status === 'Disetujui' ? `470/${request.id.toString().slice(-3)}/VIII/2025` : 'Belum Dibuat',
             tanggal: request.submissionDate,
             jenisSurat: letterTypeMap[request.letterType] || request.letterType,
             pemohon: request.citizenName,
             status: request.status,
-            sumber: 'Permohonan Warga', // Penanda sumber
+            sumber: 'Permohonan Warga',
             originalId: request.id
         });
     });
 
-    // 3. Urutkan data gabungan berdasarkan tanggal
     unifiedLetters.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-    // 4. Buat baris tabel dari data yang sudah digabung
     const letterRows = unifiedLetters.map(item => {
         const status = statusMap[item.status];
         const sumberClass = item.sumber === 'Internal' ? 'bg-gray-100 text-gray-700' : 'bg-purple-100 text-purple-700';
         
-        // Tentukan tombol aksi berdasarkan sumber dan status
         let actionButton = '';
         if (item.sumber === 'Permohonan Warga') {
-            if (item.status === 'Menunggu Verifikasi') {
+            if (item.status === 'Menunggu Verifikasi' || item.status === 'Diproses') {
                 actionButton = `<button class="process-request-btn text-blue-600 hover:underline" data-id="${item.originalId}">Proses</button>`;
             } else {
                  actionButton = `<button class="view-request-btn text-slate-500 hover:underline" data-id="${item.originalId}">Detail</button>`;
             }
-        } else { // Internal
+        } else {
             actionButton = `<button class="view-letter-btn text-blue-600 hover:underline" data-id="${item.originalId}">Lihat/Cetak</button>`;
         }
 
@@ -3547,17 +3547,24 @@ function renderAssignmentPage() {
         `;
     }).join("");
 
-    // 5. Render seluruh halaman
     const content = `
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
                 <h2 class="text-3xl font-bold text-slate-800">Manajemen Surat</h2>
                 <p class="text-slate-500">Kelola semua surat keluar dan permohonan dari warga dalam satu tempat.</p>
             </div>
-            <button id="add-letter-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                <span>Buat Surat Internal</span>
-            </button>
+            <div class="flex gap-2">
+                 <button id="refresh-letters-btn" class="flex-shrink-0 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Refresh</span>
+                </button>
+                <button id="add-letter-btn" class="w-full md:w-auto flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    <span>Buat Surat Internal</span>
+                </button>
+            </div>
         </div>
         <div class="bg-white rounded-xl shadow overflow-hidden">
             <div class="overflow-x-auto">
@@ -3580,16 +3587,21 @@ function renderAssignmentPage() {
     `;
     dashboardContent.innerHTML = content;
     
-    // 6. Tambahkan Event Listener yang relevan
     document.getElementById("add-letter-btn").addEventListener("click", showLetterModal);
+    
+    // TAMBAHKAN EVENT LISTENER UNTUK TOMBOL REFRESH
+    document.getElementById("refresh-letters-btn").addEventListener("click", () => {
+        renderLettersPage();
+        showToast("Data permohonan telah diperbarui.");
+    });
 
     document.querySelectorAll(".process-request-btn, .view-request-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             const requestId = e.currentTarget.dataset.id;
-            // Kita gunakan kembali fungsi modal detail yang sudah ada
             showRequestDetailModal(requestId); 
         });
     });
+}   
 
     // BARU: Fungsi untuk memuat data permohonan dari localStorage
 function loadCitizenRequestsFromStorage() {
@@ -3605,9 +3617,7 @@ function loadCitizenRequestsFromStorage() {
 function saveCitizenRequestsToStorage() {
     localStorage.setItem('citizenRequestsData', JSON.stringify(citizenRequestsData));
 }
-    
-    // Anda bisa menambahkan event listener untuk .view-letter-btn jika diperlukan
-}
+   
       // Fungsi untuk menampilkan halaman Disposisi Surat
       function renderDispositionsPage() {
         const statusMap = {
@@ -3712,7 +3722,7 @@ function saveCitizenRequestsToStorage() {
           });
         });
       }
-
+    
       function startAddGisMode() {
         if (!map) return;
 
@@ -3939,26 +3949,33 @@ function saveCitizenRequestsToStorage() {
       }
 
       // Fungsi untuk menyetujui permohonan
-      function approveRequest(requestId) {
-        const request = citizenRequestsData.find(r => r.id == requestId);
-        if (request) {
-          request.status = 'Disetujui';
-          saveCitizenRequestsToStorage();
-          renderCitizenRequestsPage();
-          showToast(`Permohonan surat dari ${request.citizenName} telah disetujui`);
-        }
-      }
+      // GANTI FUNGSI INI
+function approveRequest(requestId) {
+    const request = citizenRequestsData.find(r => r.id == requestId);
+    if (request) {
+        request.status = 'Diproses'; // Ubah status menjadi Diproses dulu
+        saveCitizenRequestsToStorage(); // SIMPAN PERUBAHAN
+        renderLettersPage(); // Muat ulang tampilan
+        showToast(`Permohonan surat dari ${request.citizenName} sedang diproses.`);
+        
+        // Otomatis buka modal pembuatan surat untuk permohonan ini
+        // (Ini adalah peningkatan alur kerja yang bagus)
+        setTimeout(() => showLetterModal(request), 500);
+    }
+}
 
-      // Fungsi untuk menolak permohonan
-      function rejectRequest(requestId) {
-        const request = citizenRequestsData.find(r => r.id == requestId);
-        if (request) {
-          request.status = 'Ditolak';
-          saveCitizenRequestsToStorage();
-          renderCitizenRequestsPage();
-          showToast(`Permohonan surat dari ${request.citizenName} telah ditolak`);
+// GANTI FUNGSI INI
+function rejectRequest(requestId) {
+    const request = citizenRequestsData.find(r => r.id == requestId);
+    if (request) {
+        if (confirm(`Apakah Anda yakin ingin menolak permohonan dari ${request.citizenName}?`)) {
+            request.status = 'Ditolak';
+            saveCitizenRequestsToStorage(); // SIMPAN PERUBAHAN
+            renderLettersPage(); // Muat ulang tampilan
+            showToast(`Permohonan surat dari ${request.citizenName} telah ditolak`, true);
         }
-      }
+    }
+}
 
       // Fungsi untuk menampilkan detail permohonan
       function showRequestDetailModal(requestId) {

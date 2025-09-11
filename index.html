@@ -784,7 +784,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script>
         // Data untuk menyimpan pengajuan surat dari warga
-        let citizenRequestsData = [];
+        // Langsung muat data dari localStorage saat skrip pertama kali dijalankan
+let citizenRequestsData = JSON.parse(localStorage.getItem('citizenRequestsData')) || [];
         
         // Data warga yang sedang login
         let currentCitizen = null;
@@ -1371,58 +1372,61 @@
             }
         });
         
-        citizenRequestForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const letterType = e.target.letterType.value;
-            const purpose = e.target.purpose.value;
-            const additionalInfo = e.target.additionalInfo.value;
-            
-            // Create new request
-            const newRequest = {
-                id: Date.now(),
-                citizenId: currentCitizen.id,
-                citizenName: currentCitizen.nama,
-                citizenNik: currentCitizen.nik,
-                letterType: letterType,
-                purpose: purpose,
-                additionalInfo: additionalInfo,
-                status: 'Menunggu Verifikasi',
-                submissionDate: new Date().toISOString().split('T')[0],
-                file: null, // In a real app, this would handle file uploads
-                isRead: false, // Tandai sebagai belum dibaca
-                // Tambahkan data tambahan untuk surat
-                birthPlace: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[0] : '',
-                birthDate: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[1] : '',
-                gender: currentCitizen.gender || '',
-                occupation: currentCitizen.pekerjaan || '',
-                address: currentCitizen.address || ''
-            };
-            
-            citizenRequestsData.push(newRequest);
-            
-            // Simpan ke localStorage
-            saveCitizenRequestsToStorage();
-            
-            // Reset form
-            citizenRequestForm.reset();
-            
-            // Show success message
-            showToast('Pengajuan surat berhasil dikirim!');
-            
-            // Redirect to dashboard
-            setTimeout(() => {
-                citizenRequestPage.classList.add('hidden');
-                citizenDashboardPage.classList.remove('hidden');
-                
-                // Update dashboard stats
-                updateDashboardStats();
-                
-                // Load recent requests
-                loadRecentRequests();
-            }, 1500);
-        });
+// GANTI SELURUH FUNGSI INI
+citizenRequestForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // 1. Ambil data LAMA dari localStorage terlebih dahulu
+    const existingRequests = JSON.parse(localStorage.getItem('citizenRequestsData')) || [];
+
+    const letterType = e.target.letterType.value;
+    const purpose = e.target.purpose.value;
+    const additionalInfo = e.target.additionalInfo.value;
+    
+    // 2. Buat objek permohonan baru (kode Anda sudah benar)
+    const newRequest = {
+        id: Date.now(),
+        citizenId: currentCitizen.id,
+        citizenName: currentCitizen.nama,
+        citizenNik: currentCitizen.nik,
+        letterType: letterType,
+        purpose: purpose,
+        additionalInfo: additionalInfo,
+        status: 'Menunggu Verifikasi',
+        submissionDate: new Date().toISOString().split('T')[0],
+        file: null,
+        isRead: false,
+        birthPlace: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[0] : 'Bandung',
+        birthDate: currentCitizen.ttl ? currentCitizen.ttl.split(' ')[1] : currentCitizen.ttl,
+        gender: currentCitizen.gender || 'Laki-laki',
+        occupation: currentCitizen.pekerjaan || 'Wiraswasta',
+        address: currentCitizen.address || ''
+    };
+
+    // 3. Tambahkan permohonan baru ke daftar LAMA
+    existingRequests.push(newRequest);
+    
+    // 4. Simpan kembali daftar yang sudah diperbarui ke localStorage
+    localStorage.setItem('citizenRequestsData', JSON.stringify(existingRequests));
+    
+    // Reset form
+    citizenRequestForm.reset();
+    
+    // Tampilkan pesan sukses
+    showToast('Pengajuan surat berhasil dikirim!');
+    
+    // Redirect to dashboard
+    setTimeout(() => {
+        citizenRequestPage.classList.add('hidden');
+        citizenDashboardPage.classList.remove('hidden');
         
+        // Perbarui data di halaman setelah submit
+        loadCitizenRequestsFromStorage();
+        updateDashboardStats();
+        loadRecentRequests();
+    }, 1500);
+});
+
         function updateDashboardStats() {
             if (!currentCitizen) return;
             
