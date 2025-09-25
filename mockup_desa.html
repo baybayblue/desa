@@ -15,6 +15,7 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
       font-family: "Inter", sans-serif;
@@ -794,46 +795,124 @@
   </div>
   <div id="population-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
     <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
-    <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-2xl z-40 transform scale-95">
-      <form id="population-form" class="p-6">
-        <h3 id="population-modal-title" class="text-xl font-bold text-slate-800 mb-4"></h3>
-        <input type="hidden" id="population-id" />
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label for="pop-nik" class="text-sm font-medium">NIK</label><input type="text" id="pop-nik" required
-              class="form-input mt-1 w-full p-2 border rounded" />
-          </div>
-          <div>
-            <label for="pop-nama" class="text-sm font-medium">Nama Lengkap</label><input type="text" id="pop-nama"
-              required class="form-input mt-1 w-full p-2 border rounded" />
-          </div>
-          <div>
-            <label for="pop-ttl" class="text-sm font-medium">Tanggal Lahir</label><input type="date" id="pop-ttl"
-              required class="form-input mt-1 w-full p-2 border rounded" />
-          </div>
-          <div>
-            <label for="pop-gender" class="text-sm font-medium">Jenis Kelamin</label><select id="pop-gender" required
-              class="form-input mt-1 w-full p-2 border rounded bg-white">
-              <option>Laki-laki</option>
-              <option>Perempuan</option>
-            </select>
-          </div>
-          <div class="md:col-span-2">
-            <label for="pop-address" class="text-sm font-medium">Alamat</label><textarea id="pop-address" rows="2"
-              required class="form-input mt-1 w-full p-2 border rounded"></textarea>
-          </div>
-        </div>
-        <div class="mt-6 flex justify-end gap-3">
-          <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">
-            Batal
-          </button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Simpan
-          </button>
-        </div>
-      </form>
+    <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-4xl z-40 transform scale-95 flex flex-col">
+        <form id="population-form" class="flex-1 flex flex-col">
+            <div class="p-6 border-b">
+                <h3 id="population-modal-title" class="text-xl font-bold text-slate-800"></h3>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto" style="max-height: 75vh;">
+                <input type="hidden" id="population-id" />
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="pop-kk" class="text-sm font-medium">Nomor Kartu Keluarga</label>
+                        <input type="text" id="pop-kk" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-nik" class="text-sm font-medium">NIK</label>
+                        <input type="text" id="pop-nik" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-nama" class="text-sm font-medium">Nama Lengkap</label>
+                        <input type="text" id="pop-nama" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-tempat-lahir" class="text-sm font-medium">Tempat Lahir</label>
+                        <input type="text" id="pop-tempat-lahir" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-ttl" class="text-sm font-medium">Tanggal Lahir</label>
+                        <input type="date" id="pop-ttl" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-gender" class="text-sm font-medium">Jenis Kelamin</label>
+                        <select id="pop-gender" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>Laki-laki</option>
+                            <option>Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pop-agama" class="text-sm font-medium">Agama</label>
+                        <select id="pop-agama" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>Islam</option>
+                            <option>Kristen</option>
+                            <option>Katolik</option>
+                            <option>Hindu</option>
+                            <option>Budha</option>
+                            <option>Khonghucu</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pop-pendidikan" class="text-sm font-medium">Pendidikan Terakhir</label>
+                        <select id="pop-pendidikan" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>Tidak/Belum Sekolah</option>
+                            <option>Belum Tamat SD/Sederajat</option>
+                            <option>Tamat SD/Sederajat</option>
+                            <option>SLTP/Sederajat</option>
+                            <option>SLTA/Sederajat</option>
+                            <option>Diploma I/II</option>
+                            <option>Akademi/Diploma III/S. Muda</option>
+                            <option>Diploma IV/Strata I</option>
+                            <option>Strata II</option>
+                            <option>Strata III</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pop-pekerjaan" class="text-sm font-medium">Jenis Pekerjaan</label>
+                        <input type="text" id="pop-pekerjaan" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-status-perkawinan" class="text-sm font-medium">Status Perkawinan</label>
+                        <select id="pop-status-perkawinan" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>Belum Kawin</option>
+                            <option>Kawin</option>
+                            <option>Cerai Hidup</option>
+                            <option>Cerai Mati</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pop-status-hubungan" class="text-sm font-medium">Status Hubungan Keluarga</label>
+                        <select id="pop-status-hubungan" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>Kepala Keluarga</option>
+                            <option>Istri</option>
+                            <option>Anak</option>
+                            <option>Cucu</option>
+                            <option>Orang Tua</option>
+                            <option>Mertua</option>
+                            <option>Famili Lain</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label for="pop-kewarganegaraan" class="text-sm font-medium">Kewarganegaraan</label>
+                        <select id="pop-kewarganegaraan" required class="form-input mt-1 w-full p-2 border rounded bg-white">
+                            <option>WNI</option>
+                            <option>WNA</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="pop-nama-ayah" class="text-sm font-medium">Nama Ayah</label>
+                        <input type="text" id="pop-nama-ayah" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                        <label for="pop-nama-ibu" class="text-sm font-medium">Nama Ibu</label>
+                        <input type="text" id="pop-nama-ibu" required class="form-input mt-1 w-full p-2 border rounded" />
+                    </div>
+                     <div class="md:col-span-3">
+                        <label for="pop-address" class="text-sm font-medium">Alamat</label>
+                        <textarea id="pop-address" rows="2" required class="form-input mt-1 w-full p-2 border rounded"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t flex justify-end gap-3 mt-auto">
+                <button type="button" class="modal-cancel-btn px-4 py-2 bg-slate-200 rounded-lg hover:bg-slate-300">
+                    Batal
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Simpan
+                </button>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
   <div id="leave-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
     <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
     <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-lg z-40 transform scale-95">
@@ -1382,17 +1461,21 @@
     <p id="toast-message"></p>
   </div>
 
-  <div id="qr-code-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+  <div id="qr-scanner-modal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
     <div class="absolute inset-0 bg-black opacity-50 modal-backdrop"></div>
-    <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-sm z-40 p-6 text-center transform scale-95">
-        <h3 class="text-xl font-bold text-slate-800">Pindai QR Code untuk Absensi</h3>
-        <p class="text-sm text-slate-500 mt-2 mb-4">Arahkan pemindai ke kode di bawah ini untuk mencatat kehadiran Anda.</p>
-        <div class="w-64 h-64 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-            <img id="attendance-qr-code-img" src="" alt="QR Code Absensi" class="w-full h-full object-contain">
+    <div class="modal-content bg-white rounded-lg shadow-xl w-11/12 max-w-md z-40 p-6 text-center transform scale-95">
+        <h3 class="text-xl font-bold text-slate-800">Pindai ID Card Anda</h3>
+        <p class="text-sm text-slate-500 mt-2 mb-4">Posisikan QR Code pada ID Card Anda di dalam kotak pemindai.</p>
+        
+        <div class="w-full mx-auto border-4 border-gray-200 rounded-lg overflow-hidden" style="width: 300px; height: 300px;">
+            <div id="qr-reader"></div>
         </div>
+
+        <p id="qr-reader-status" class="text-sm text-gray-600 mt-4">Menyalakan kamera...</p>
+        
         <div class="mt-6">
-            <button type="button" class="modal-cancel-btn w-full px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 font-semibold">
-                Tutup
+            <button type="button" id="close-scanner-btn" class="w-full px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 font-semibold">
+                Batal
             </button>
         </div>
     </div>
@@ -1426,7 +1509,8 @@
       const trackingModal = document.getElementById("tracking-modal");
       const assetModal = document.getElementById("asset-modal");
       const financeModal = document.getElementById("finance-modal");
-      const qrCodeModal = document.getElementById('qr-code-modal');
+      const qrScannerModal = document.getElementById('qr-scanner-modal');
+      let html5QrCodeScanner = null; // Untuk menyimpan instance scanner
 
       const employeeForm = document.getElementById("employee-form");
       const leaveForm = document.getElementById("leave-form");
@@ -1484,32 +1568,63 @@
     { id: 7, employeeId: 2, nama: "Siti Aminah", tanggal: "2025-09-05", jamMasuk: "07:58", jamPulang: "16:00", status: "Tepat Waktu" },
     { id: 8, employeeId: 3, nama: "Eko Prasetyo", tanggal: "2025-09-05", jamMasuk: "08:05", jamPulang: "16:01", status: "Terlambat" },
 ];
-      let populationData = [
-        {
-          id: 1,
-          nik: "3204012345670001",
-          nama: "Asep Sunandar",
-          ttl: "1980-05-15",
-          gender: "Laki-laki",
-          address: "Kp. Ciharum RT 01/RW 02",
-        },
-        {
-          id: 2,
-          nik: "3204016543210002",
-          nama: "Mimin Mintarsih",
-          ttl: "1982-11-20",
-          gender: "Perempuan",
-          address: "Kp. Ciharum RT 01/RW 02",
-        },
-        {
-          id: 3,
-          nik: "3204011010100003",
-          nama: "Ujang Kastaman",
-          ttl: "1975-01-30",
-          gender: "Laki-laki",
-          address: "Kp. Bojong Koneng RT 03/RW 01",
-        },
-      ];
+     // GANTI SELURUH BLOK DATA INI
+let populationData = [
+    {
+        id: 1,
+        noKK: "3204012345670001",
+        nik: "3204011505800001",
+        nama: "Asep Sunandar",
+        tempatLahir: "Bandung",
+        ttl: "1980-05-15",
+        gender: "Laki-laki",
+        agama: "Islam",
+        pendidikan: "S1/Sederajat",
+        pekerjaan: "Wiraswasta",
+        statusPerkawinan: "Kawin",
+        statusHubungan: "Kepala Keluarga",
+        kewarganegaraan: "WNI",
+        namaAyah: "Sumarna",
+        namaIbu: "Siti Rohmah",
+        address: "Kp. Ciharum RT 01/RW 02",
+    },
+    {
+        id: 2,
+        noKK: "3204012345670001",
+        nik: "3204016511820002",
+        nama: "Mimin Mintarsih",
+        tempatLahir: "Ciamis",
+        ttl: "1982-11-20",
+        gender: "Perempuan",
+        agama: "Islam",
+        pendidikan: "SLTA/Sederajat",
+        pekerjaan: "Mengurus Rumah Tangga",
+        statusPerkawinan: "Kawin",
+        statusHubungan: "Istri",
+        kewarganegaraan: "WNI",
+        namaAyah: "Koswara",
+        namaIbu: "Euis",
+        address: "Kp. Ciharum RT 01/RW 02",
+    },
+    {
+        id: 3,
+        noKK: "3204011010100003",
+        nik: "3204013001750003",
+        nama: "Ujang Kastaman",
+        tempatLahir: "Garut",
+        ttl: "1975-01-30",
+        gender: "Laki-laki",
+        agama: "Islam",
+        pendidikan: "SLTP/Sederajat",
+        pekerjaan: "Petani/Pekebun",
+        statusPerkawinan: "Kawin",
+        statusHubungan: "Kepala Keluarga",
+        kewarganegaraan: "WNI",
+        namaAyah: "Didi",
+        namaIbu: "Iyah",
+        address: "Kp. Bojong Koneng RT 03/RW 01",
+    },
+];
       let leaveRequestsData = [
         {
           id: 1,
@@ -2252,7 +2367,7 @@ sidebarNav.addEventListener("click", (e) => {
                         <p class="text-5xl font-bold mt-2" id="current-time"></p>
                     </div>
                     <button id="scan-attendance-btn" class="mt-8 w-full bg-white text-blue-600 font-bold py-4 px-8 rounded-lg text-lg hover:bg-blue-100 transition-colors transform hover:scale-105 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                         <span>SCAN ABSEN SEKARANG</span>
                     </button>
                 </div>
@@ -2273,11 +2388,11 @@ sidebarNav.addEventListener("click", (e) => {
             </div>`;
     } 
     else if (view === "admin") {
+        loadCitizenRequestsFromStorage(); // Muat data terbaru untuk statistik
         const formatCurrency = (amount) => `Rp ${amount.toLocaleString("id-ID")}`;
         const totalIncome = financeData.filter(t => t.type === 'Pemasukan').reduce((sum, t) => sum + t.amount, 0);
         const totalExpense = financeData.filter(t => t.type === 'Pengeluaran').reduce((sum, t) => sum + t.amount, 0);
         const currentBalance = totalIncome - totalExpense;
-
         const pendingDispositions = dispositionsData.filter(d => d.status === 'Baru').length;
         const pendingCitizenRequests = citizenRequestsData.filter(r => r.status === 'Menunggu Verifikasi').length;
         const activeAssignments = assignmentsData.filter(a => a.status === 'Baru' || a.status === 'Dikerjakan').length;
@@ -2312,17 +2427,11 @@ sidebarNav.addEventListener("click", (e) => {
                         <h4 class="font-semibold text-slate-800 mb-3">Pintasan & Persetujuan</h4>
                         <div class="space-y-3">
                              <div class="bg-amber-50 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-amber-100" data-view="attendance-management">
-                                <div>
-                                    <p class="font-semibold text-amber-800">Persetujuan Izin</p>
-                                    <p class="text-sm text-amber-700">${leaveRequestsData.filter(r => r.status === 'Menunggu').length} pengajuan baru</p>
-                                </div>
+                                <div><p class="font-semibold text-amber-800">Persetujuan Izin</p><p class="text-sm text-amber-700">${leaveRequestsData.filter(r => r.status === 'Menunggu').length} pengajuan baru</p></div>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                             </div>
                              <div class="bg-blue-50 p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-blue-100" data-view="letters">
-                                <div>
-                                    <p class="font-semibold text-blue-800">Permohonan Surat</p>
-                                    <p class="text-sm text-blue-700">${pendingCitizenRequests} permohonan baru</p>
-                                </div>
+                                <div><p class="font-semibold text-blue-800">Permohonan Surat</p><p class="text-sm text-blue-700">${pendingCitizenRequests} permohonan baru</p></div>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                             </div>
                         </div>
@@ -2368,9 +2477,7 @@ sidebarNav.addEventListener("click", (e) => {
         setInterval(updateTime, 1000);
         
         document.getElementById('scan-attendance-btn').addEventListener('click', () => {
-            const currentUserName = userNameEl.textContent;
-            const employee = employeesData.find(emp => emp.nama === currentUserName);
-            showQrCodeModal(employee);
+            showQrScannerModal();
         });
     }
     
@@ -2433,8 +2540,6 @@ sidebarNav.addEventListener("click", (e) => {
 }
 
 
-
-
 function renderEmployeeManagement(searchFilter = "", statusFilter = "Aktif") {
     const pageTitle = `Daftar Pegawai ${statusFilter === 'Aktif' ? 'Aktif' : 'Non Aktif'}`;
 
@@ -2454,35 +2559,43 @@ function renderEmployeeManagement(searchFilter = "", statusFilter = "Aktif") {
         "Kaur Keuangan": 3, "Staf Pelayanan": 4,
     };
 
-    const employeeCards = filteredData
-        .sort((a, b) => {
-            const rankA = jabatanRank[a.jabatan] || 99;
-            const rankB = jabatanRank[b.jabatan] || 99;
-            if (rankA < rankB) return -1;
-            if (rankA > rankB) return 1;
-            return a.nama.localeCompare(b.nama);
-        })
-        .map(
-            (emp) => `
-            <div class="employee-card bg-white rounded-xl shadow p-5 text-center flex flex-col items-center">
-                <div class="relative w-20 h-20">
-                    <div class="w-20 h-20 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-3xl font-bold mb-4">${emp.nama.charAt(0)}</div>
-                    <span class="absolute -bottom-1 right-0 text-xs font-semibold px-2 py-0.5 rounded-full ${emp.status === 'Aktif' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-slate-200 text-slate-700 border border-slate-300'}">${emp.status}</span>
-                </div>
-                <h4 class="font-bold text-lg text-slate-800 mt-4">${emp.nama}</h4>
-                <p class="text-sm text-slate-500">${emp.email}</p>
-                <span class="mt-2 text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">${emp.jabatan}</span>
-                <div class="border-t my-4 w-full"></div>
-                <div class="flex gap-2 justify-center">
-                    <button class="edit-btn p-2 text-slate-500 hover:text-blue-600" data-id="${emp.id}" title="Ubah"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
-                    <button class="delete-btn p-2 text-slate-500 hover:text-red-600" data-id="${emp.id}" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
-                    <button class="print-employee-btn p-2 text-slate-500 hover:text-gray-800" data-id="${emp.id}" title="Cetak Data Pegawai Ini"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg></button>
-                    <button class="export-performance-btn p-2 text-slate-500 hover:text-green-600" data-id="${emp.id}" title="Ekspor Kinerja (Excel)"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 01-1-1V4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H3zm6.293-9.707a1 1 0 011.414 0L13 9.586V6a1 1 0 112 0v3.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
-                </div>
+  // GANTI SELURUH BLOK "const employeeCards" DI DALAM FUNGSI renderEmployeeManagement
+const employeeCards = filteredData
+    .sort((a, b) => {
+        const rankA = jabatanRank[a.jabatan] || 99;
+        const rankB = jabatanRank[b.jabatan] || 99;
+        if (rankA < rankB) return -1;
+        if (rankA > rankB) return 1;
+        return a.nama.localeCompare(b.nama);
+    })
+    .map(
+        (emp) => `
+        <div class="employee-card bg-white rounded-xl shadow p-5 text-center flex flex-col items-center">
+            <div class="relative w-20 h-20">
+                <div class="w-20 h-20 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-3xl font-bold mb-4">${emp.nama.charAt(0)}</div>
+                <span class="absolute -bottom-1 right-0 text-xs font-semibold px-2 py-0.5 rounded-full ${emp.status === 'Aktif' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-slate-200 text-slate-700 border border-slate-300'}">${emp.status}</span>
             </div>
-            `
-        )
-        .join("");
+            <h4 class="font-bold text-lg text-slate-800 mt-4">${emp.nama}</h4>
+            <p class="text-sm text-slate-500">${emp.email}</p>
+            <span class="mt-2 text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full">${emp.jabatan}</span>
+            <div class="border-t my-4 w-full"></div>
+            <div class="flex gap-2 justify-center">
+                <button class="edit-btn p-2 text-slate-500 hover:text-blue-600" data-id="${emp.id}" title="Ubah"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
+                <button class="delete-btn p-2 text-slate-500 hover:text-red-600" data-id="${emp.id}" title="Hapus"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                <button class="print-employee-btn p-2 text-slate-500 hover:text-gray-800" data-id="${emp.id}" title="Cetak Data Pegawai Ini"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg></button>
+                
+                <button class="toggle-status-btn p-2 text-slate-500 hover:text-yellow-600" data-id="${emp.id}" title="Ubah Status">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 12L3 8m4 4l4-4m6 8v12m0-12l4 4m-4-4l-4 4" />
+                    </svg>
+                </button>
+
+            </div>
+        </div>
+        `
+    )
+    .join("");
+        
 
     const content = `<div id="employee-management-content"><div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"><div class="w-full">
                         <h2 class="text-3xl font-bold text-slate-800">${pageTitle}</h2>
@@ -3413,76 +3526,79 @@ function renderAssignmentPage() {
     });
 }
 
-      function renderPopulationPage(filter = "") {
-        const filteredData = populationData.filter(
-          (p) =>
-            p.nama.toLowerCase().includes(filter.toLowerCase()) ||
-            p.nik.includes(filter)
-        );
-        const tableRows = filteredData
-          .map(
+    // GANTI SELURUH FUNGSI INI
+function renderPopulationPage(filter = "") {
+    const filteredData = populationData.filter(
+        (p) =>
+        p.nama.toLowerCase().includes(filter.toLowerCase()) ||
+        p.nik.includes(filter) ||
+        p.noKK.includes(filter)
+    );
+    const tableRows = filteredData
+        .map(
             (p) => `
-                    <tr class="border-b last:border-b-0">
-                        <td class="px-4 py-3 font-medium">${p.nik}</td>
-                        <td class="px-4 py-3">${p.nama}</td>
-                        <td class="px-4 py-3 text-slate-500">${p.ttl}</td>
-                        <td class="px-4 py-3 text-slate-500">${p.gender}</td>
-                        <td class="px-4 py-3 text-slate-500">${p.address}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex gap-2">
-                                <button class="edit-population-btn text-blue-600 hover:underline" data-id="${p.id}">Ubah</button>
-                                <button class="delete-population-btn text-red-600 hover:underline" data-id="${p.id}">Hapus</button>
-                            </div>
-                        </td>
-                    </tr>
-                `
-          )
-          .join("");
-        const content = `
-                    <div id="print-area">
-                        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                            <div class="w-full">
-                                <h2 class="text-3xl font-bold text-slate-800">Data Penduduk</h2>
-                                <p class="text-slate-500">Manajemen data kependudukan desa.</p>
-                            </div>
-                            <div class="flex w-full md:w-auto gap-2 no-print">
-                                <div class="relative flex-grow"><input type="text" id="search-population" placeholder="Cari NIK atau nama..." class="form-input w-full pl-10 pr-4 py-2 border rounded-lg"><svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
-                                <button id="import-excel-btn" class="flex-shrink-0 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                                    <span>Import</span>
-                                </button>
-                                <button id="print-population-btn" class="flex-shrink-0 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
-                                    <span>Cetak</span>
-                                </button>
-                                <button id="add-population-btn" class="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                                    <span>Tambah</span>
-                                </button>
-                            </div>
+                <tr class="border-b last:border-b-0">
+                    <td class="px-4 py-3 font-medium">${p.nik}<p class="text-xs text-slate-400 font-normal">KK: ${p.noKK}</p></td>
+                    <td class="px-4 py-3">${p.nama}</td>
+                    <td class="px-4 py-3 text-slate-500">${p.tempatLahir}, ${p.ttl}</td>
+                    <td class="px-4 py-3 text-slate-500">${p.pekerjaan}</td>
+                    <td class="px-4 py-3 text-slate-500">${p.statusPerkawinan}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-2">
+                            <button class="edit-population-btn text-blue-600 hover:underline" data-id="${p.id}">Ubah</button>
+                            <button class="delete-population-btn text-red-600 hover:underline" data-id="${p.id}">Hapus</button>
                         </div>
-                        <div class="bg-white rounded-xl shadow overflow-hidden">
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm text-left">
-                                    <thead class="text-xs text-slate-500 uppercase bg-slate-50">
-                                        <tr>
-                                            <th class="px-4 py-3">NIK</th>
-                                            <th class="px-4 py-3">Nama</th>
-                                            <th class="px-4 py-3">Tgl Lahir</th>
-                                            <th class="px-4 py-3">L/P</th>
-                                            <th class="px-4 py-3">Alamat</th>
-                                            <th class="px-4 py-3 no-print">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${tableRows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                `;
-        dashboardContent.innerHTML = content;
-        attachPopulationEventListeners();
-      }
+                    </td>
+                </tr>
+            `
+        )
+        .join("");
+        
+    const content = `
+        <div id="print-area">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="w-full">
+                    <h2 class="text-3xl font-bold text-slate-800">Data Penduduk</h2>
+                    <p class="text-slate-500">Manajemen data kependudukan desa.</p>
+                </div>
+                <div class="flex w-full md:w-auto gap-2 no-print">
+                    <div class="relative flex-grow"><input type="text" id="search-population" placeholder="Cari NIK, KK, atau nama..." class="form-input w-full pl-10 pr-4 py-2 border rounded-lg"><svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                    <button id="import-excel-btn" class="flex-shrink-0 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-semibold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>Import</span>
+                    </button>
+                    <button id="print-population-btn" class="flex-shrink-0 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-semibold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v3a2 2 0 002 2h6a2 2 0 002-2v-3h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                        <span>Cetak</span>
+                    </button>
+                    <button id="add-population-btn" class="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                        <span>Tambah</span>
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3">NIK / No. KK</th>
+                                <th class="px-4 py-3">Nama</th>
+                                <th class="px-4 py-3">Tempat, Tgl Lahir</th>
+                                <th class="px-4 py-3">Pekerjaan</th>
+                                <th class="px-4 py-3">Status Kawin</th>
+                                <th class="px-4 py-3 no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+    dashboardContent.innerHTML = content;
+    attachPopulationEventListeners();
+}
       function renderLettersPage() {
     // 1. Definisikan pemetaan status dan jenis surat
     const statusMap = {
@@ -4665,10 +4781,25 @@ function saveCitizenRequestsToStorage() {
             showDeleteModal(e.currentTarget.dataset.id, "employee")
         )
     );
-    document.querySelectorAll(".export-performance-btn").forEach((btn) =>
-        btn.addEventListener("click", (e) =>
-            exportEmployeePerformanceToExcel(e.currentTarget.dataset.id)
-        )
+    document.querySelectorAll(".toggle-status-btn").forEach((btn) =>
+        btn.addEventListener("click", (e) => {
+            const employeeId = e.currentTarget.dataset.id;
+            const employee = employeesData.find(emp => emp.id == employeeId);
+
+            if (employee) {
+                // Logika untuk mengubah status
+                employee.status = (employee.status === 'Aktif') ? 'Tidak Aktif' : 'Aktif';
+
+                showToast(`Status ${employee.nama} berhasil diubah menjadi ${employee.status}.`);
+
+                // Dapatkan filter yang sedang aktif untuk me-render ulang halaman
+                const currentSearch = document.getElementById("search-employee")?.value || "";
+                const currentStatusFilter = document.querySelector("#employee-management-content h2").textContent.includes("Aktif") ? "Aktif" : "Tidak Aktif";
+                
+                // Render ulang halaman untuk menghilangkan kartu yang statusnya berubah
+                renderEmployeeManagement(currentSearch, currentStatusFilter);
+            }
+        })
     );
 }
 
@@ -4765,27 +4896,38 @@ function saveCitizenRequestsToStorage() {
           10
         );
       }
-      function showEditPopulationModal(id) {
-        const resident = populationData.find((p) => p.id == id);
-        if (resident) {
-          document.getElementById("population-id").value = resident.id;
-          document.getElementById("pop-nik").value = resident.nik;
-          document.getElementById("pop-nama").value = resident.nama;
-          document.getElementById("pop-ttl").value = resident.ttl;
-          document.getElementById("pop-gender").value = resident.gender;
-          document.getElementById("pop-address").value = resident.address;
-          document.getElementById("population-modal-title").textContent =
-            "Ubah Data Penduduk";
-          populationModal.classList.remove("hidden");
-          setTimeout(
+      // GANTI SELURUH FUNGSI INI
+function showEditPopulationModal(id) {
+    const resident = populationData.find((p) => p.id == id);
+    if (resident) {
+        document.getElementById("population-id").value = resident.id;
+        document.getElementById("pop-kk").value = resident.noKK;
+        document.getElementById("pop-nik").value = resident.nik;
+        document.getElementById("pop-nama").value = resident.nama;
+        document.getElementById("pop-tempat-lahir").value = resident.tempatLahir;
+        document.getElementById("pop-ttl").value = resident.ttl;
+        document.getElementById("pop-gender").value = resident.gender;
+        document.getElementById("pop-agama").value = resident.agama;
+        document.getElementById("pop-pendidikan").value = resident.pendidikan;
+        document.getElementById("pop-pekerjaan").value = resident.pekerjaan;
+        document.getElementById("pop-status-perkawinan").value = resident.statusPerkawinan;
+        document.getElementById("pop-status-hubungan").value = resident.statusHubungan;
+        document.getElementById("pop-kewarganegaraan").value = resident.kewarganegaraan;
+        document.getElementById("pop-nama-ayah").value = resident.namaAyah;
+        document.getElementById("pop-nama-ibu").value = resident.namaIbu;
+        document.getElementById("pop-address").value = resident.address;
+        
+        document.getElementById("population-modal-title").textContent = "Ubah Data Penduduk";
+        populationModal.classList.remove("hidden");
+        setTimeout(
             () =>
-              populationModal
-                .querySelector(".modal-content")
-                .classList.remove("scale-95"),
+            populationModal
+            .querySelector(".modal-content")
+            .classList.remove("scale-95"),
             10
-          );
-        }
-      }
+        );
+    }
+}
       function showDeleteModal(id, type) {
         itemToDelete = { id, type };
         const message =
@@ -4926,38 +5068,6 @@ function saveCitizenRequestsToStorage() {
         );
       }
 
-      // ... (setelah fungsi showDispositionModal atau fungsi modal lainnya)
-
-// BARU: Fungsi untuk menampilkan modal QR Code absensi
-function showQrCodeModal(employee) {
-    if (!employee) {
-        showToast("Gagal memuat data pegawai untuk QR Code.", true);
-        return;
-    }
-
-    const qrCodeImg = document.getElementById('attendance-qr-code-img');
-    
-    // Data yang akan di-encode ke dalam QR Code
-    const attendanceData = {
-        nip: employee.nip,
-        nama: employee.nama,
-        timestamp: new Date().toISOString() // Waktu scan
-    };
-
-    // Ubah data menjadi string JSON dan encode untuk URL
-    const qrDataString = encodeURIComponent(JSON.stringify(attendanceData));
-
-    // Gunakan API eksternal untuk membuat gambar QR Code
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrDataString}`;
-
-    // Set gambar dan tampilkan modal
-    qrCodeImg.src = qrCodeUrl;
-    qrCodeModal.classList.remove("hidden");
-    setTimeout(() => {
-        qrCodeModal.querySelector(".modal-content").classList.remove("scale-95");
-    }, 10);
-}
-
 
 
       // Fungsi untuk menampilkan modal edit disposisi
@@ -5087,35 +5197,114 @@ function showQrCodeModal(employee) {
         currentStatusFilter
     );
 });
-      populationForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const id = document.getElementById("population-id").value;
-        const residentData = {
-          nik: document.getElementById("pop-nik").value,
-          nama: document.getElementById("pop-nama").value,
-          ttl: document.getElementById("pop-ttl").value,
-          gender: document.getElementById("pop-gender").value,
-          address: document.getElementById("pop-address").value,
-        };
-        if (id) {
-          // Update
-          const index = populationData.findIndex((p) => p.id == id);
-          populationData[index] = {
+
+// BARU: Fungsi untuk memulai pemindai QR Code
+function startQrCodeScanner() {
+    const statusEl = document.getElementById('qr-reader-status');
+    statusEl.textContent = "Menyalakan kamera...";
+
+    function onScanSuccess(decodedText, decodedResult) {
+        // Handle on success condition with the decoded text or result.
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+        statusEl.textContent = `Berhasil! Data terdeteksi.`;
+        
+        // Hentikan scanner
+        stopQrCodeScanner();
+        hideModals();
+
+        // Tampilkan notifikasi sukses
+        try {
+            const scannedData = JSON.parse(decodedText);
+            showToast(`Absensi untuk ${scannedData.nama} (NIP: ${scannedData.nip}) berhasil dicatat!`);
+        } catch (e) {
+            showToast("QR Code berhasil dipindai, namun format data tidak sesuai.");
+        }
+    }
+
+    function onScanFailure(error) {
+        // handle scan failure, usually better to ignore and keep scanning.
+        // console.warn(`Code scan error = ${error}`);
+    }
+
+    // Inisialisasi scanner
+    html5QrCodeScanner = new Html5Qrcode("qr-reader");
+    html5QrCodeScanner.start(
+        { facingMode: "environment" }, // Gunakan kamera belakang
+        {
+            fps: 10,                // Kecepatan scan
+            qrbox: { width: 250, height: 250 }  // Ukuran kotak pemindai
+        },
+        onScanSuccess,
+        onScanFailure
+    ).then(() => {
+        statusEl.textContent = "Kamera Aktif. Silakan Pindai...";
+    }).catch(err => {
+        statusEl.textContent = `Error: Tidak dapat mengakses kamera. ${err}`;
+        console.error("Gagal memulai scanner", err);
+    });
+}
+
+// BARU: Fungsi untuk menghentikan pemindai QR Code dan mematikan kamera
+function stopQrCodeScanner() {
+    if (html5QrCodeScanner && html5QrCodeScanner.isScanning) {
+        html5QrCodeScanner.stop().then(ignore => {
+            console.log("QR Code scanning stopped.");
+        }).catch(err => {
+            console.error("Gagal menghentikan scanner.", err);
+        });
+        html5QrCodeScanner = null;
+    }
+}
+
+// BARU: Fungsi untuk menampilkan modal scanner dan memulai kamera
+function showQrScannerModal() {
+    qrScannerModal.classList.remove("hidden");
+    setTimeout(() => {
+        qrScannerModal.querySelector(".modal-content").classList.remove("scale-95");
+        // Mulai scanner HANYA setelah modal terlihat
+        startQrCodeScanner();
+    }, 10);
+}
+
+populationForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const id = document.getElementById("population-id").value;
+    const residentData = {
+        noKK: document.getElementById("pop-kk").value,
+        nik: document.getElementById("pop-nik").value,
+        nama: document.getElementById("pop-nama").value,
+        tempatLahir: document.getElementById("pop-tempat-lahir").value,
+        ttl: document.getElementById("pop-ttl").value,
+        gender: document.getElementById("pop-gender").value,
+        agama: document.getElementById("pop-agama").value,
+        pendidikan: document.getElementById("pop-pendidikan").value,
+        pekerjaan: document.getElementById("pop-pekerjaan").value,
+        statusPerkawinan: document.getElementById("pop-status-perkawinan").value,
+        statusHubungan: document.getElementById("pop-status-hubungan").value,
+        kewarganegaraan: document.getElementById("pop-kewarganegaraan").value,
+        namaAyah: document.getElementById("pop-nama-ayah").value,
+        namaIbu: document.getElementById("pop-nama-ibu").value,
+        address: document.getElementById("pop-address").value,
+    };
+    if (id) {
+        // Update
+        const index = populationData.findIndex((p) => p.id == id);
+        populationData[index] = {
             ...populationData[index],
             ...residentData,
-          };
-          showToast("Data penduduk berhasil diperbarui.");
-        } else {
-          // Create
-          residentData.id = Date.now();
-          populationData.push(residentData);
-          showToast("Data penduduk baru berhasil ditambahkan.");
-        }
-        hideModals();
-        renderPopulationPage(
-          document.getElementById("search-population")?.value || ""
-        );
-      });
+        };
+        showToast("Data penduduk berhasil diperbarui.");
+    } else {
+        // Create
+        residentData.id = Date.now();
+        populationData.push(residentData);
+        showToast("Data penduduk baru berhasil ditambahkan.");
+    }
+    hideModals();
+    renderPopulationPage(
+        document.getElementById("search-population")?.value || ""
+    );
+});
       leaveForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const newLeaveRequest = {
@@ -5258,9 +5447,19 @@ function showQrCodeModal(employee) {
           showToast("Password berhasil disalin!");
         });
       });
-      document
-        .querySelectorAll(".modal-cancel-btn, .modal-backdrop")
-        .forEach((el) => el.addEventListener("click", hideModals));
+      // GANTI BLOK KODE LAMA DENGAN YANG DI BAWAH INI
+document
+    .querySelectorAll(".modal-cancel-btn, .modal-backdrop, #close-scanner-btn")
+    .forEach((el) => {
+        el.addEventListener("click", () => {
+            // Cek apakah scanner sedang berjalan, jika iya, matikan dulu kameranya
+            if (html5QrCodeScanner && html5QrCodeScanner.isScanning) {
+                stopQrCodeScanner();
+            }
+            // Setelah itu, baru tutup semua modal
+            hideModals();
+        });
+    });
       // NEW FINANCE MODULE FUNCTIONS
       function renderFinancePage() {
         if (financeFlowChart) financeFlowChart.destroy();
@@ -5571,4 +5770,4 @@ function showQrCodeModal(employee) {
   </script>
   <div id="print-single-employee-area" class="hidden"></div>
 </body>
-</html>
+</html> 
